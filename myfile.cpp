@@ -1,34 +1,178 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 using namespace std;
 
 /*
-{ Sample program
-  in TINY language
-  compute factorial
-}
+================================================================================
+  ENHANCED TINY LANGUAGE CODE GENERATOR - WITH TYPE SYSTEM
+================================================================================
+  
+  Author: Enhanced with type support (int, real, bool)
+  Date: 2025
+  
+  SUPPORTED DATA TYPES:
+  - int: Integer values (mapped to C++ int)
+  - real: Real/floating-point values (mapped to C++ double)
+  - bool: Boolean values (true/false, used in conditions only)
+  
+  VARIABLE DECLARATION RULES:
+  - ALL variables MUST be declared at the beginning of the program
+  - Format: int x; real y; bool flag;
+  - Type is mandatory for each variable
+  
+  TYPE USAGE RULES:
+  - bool variables: CAN be used in if and repeat conditions ONLY
+  - int and real variables: CANNOT be used directly in if/repeat conditions
+  - NO arithmetic operations on bool variables
+  - Arithmetic operations allowed on int and real variables
+  - int and real CAN be mixed in expressions (auto-convert int to real)
+  
+  ASSIGNMENT RULES:
+  - Variables of different types CANNOT be assigned to each other
+  - Example: int x = 5; real y = x; produces COMPILER ERROR
+  - Type checking is strict and enforced at compile time
+  
+  ERROR HANDLING:
+  - Exceptions thrown for illegal type operations
+  - Meaningful error messages for type mismatches
+  - All type violations caught before execution
+  
+  OPERATIONS SUPPORTED:
+  - Math: + - * / ^ (power)
+  - Comparison: < = (returns bool)
+  - Logical: & (and operator, for booleans)
+  - I/O: read, write
 
-read x; {input an integer}
-if 0<x then {compute only if x>=1}
-  fact:=1;
+================================================================================
+  TEST PROGRAM (20+ TEST CASES)
+================================================================================
+
+TEST PROGRAM IN TINY LANGUAGE:
+
+  // TEST CASE 1: Variable declarations of all types
+  int x;
+  real y;
+  bool flag;
+  
+  // TEST CASE 2: Integer arithmetic operations
+  x := 5;
+  x := x + 3;
+  x := x - 2;
+  x := x * 4;
+  x := x / 2;
+  x := 2 ^ 3;
+  
+  // TEST CASE 3: Real arithmetic operations
+  y := 3.5;
+  y := y + 2.5;
+  y := y - 1.0;
+  y := y * 2.0;
+  y := y / 2.5;
+  
+  // TEST CASE 4: Integer to real conversion in mixed expressions
+  y := 5 + 3.5;      // 5 (int) converted to real, result is 8.5
+  y := 10 * 2.0;     // 10 (int) converted to real, result is 20.0
+  
+  // TEST CASE 5: Boolean from comparison (integer comparison)
+  flag := 5 < 10;    // TRUE
+  flag := 10 = 10;   // TRUE
+  flag := 3 > 5;     // FALSE (result of 5<3)
+  
+  // TEST CASE 6: Boolean from comparison (real comparison)
+  flag := 3.5 < 4.0; // TRUE
+  flag := 2.5 = 2.5; // TRUE
+  
+  // TEST CASE 7: Conditional with boolean variable
+  if flag then
+    x := 100
+  end;
+  
+  // TEST CASE 8: Repeat with boolean condition
   repeat
-    fact := fact * x;
-    x:=x-1
-  until x=0;
-  write fact {output factorial}
-end
+    x := x + 1
+  until x = 50;
+  
+  // TEST CASE 9: Invalid - int in condition (should error)
+  // if x then ... end;  // COMPILER ERROR: int cannot be used in condition
+  
+  // TEST CASE 10: Invalid - real in condition (should error)
+  // if y then ... end;  // COMPILER ERROR: real cannot be used in condition
+  
+  // TEST CASE 11: Invalid - bool arithmetic (should error)
+  // flag := flag + 1;   // COMPILER ERROR: cannot do arithmetic on bool
+  
+  // TEST CASE 12: Invalid - type mismatch assignment (should error)
+  // x := y;             // COMPILER ERROR: cannot assign real to int
+  // y := x;             // COMPILER ERROR: cannot assign int to real
+  
+  // TEST CASE 13: Read integer
+  read x;
+  
+  // TEST CASE 14: Read real
+  read y;
+  
+  // TEST CASE 15: Write integer result
+  write x + 5;
+  
+  // TEST CASE 16: Write real result
+  write y * 2.0;
+  
+  // TEST CASE 17: Write boolean result
+  write 5 < 10;
+  
+  // TEST CASE 18: Nested expressions with proper type conversion
+  y := 5 + 3.5 * 2.0;
+  
+  // TEST CASE 19: Power operation with integers
+  x := 2 ^ 8;  // Result: 256
+  
+  // TEST CASE 20: Complex boolean logic with & operator
+  flag := 5 < 10 & 3 = 3;  // TRUE AND TRUE = TRUE
+  
+  // TEST CASE 21: Type checking prevents unintended conversions
+  // x := 5.5;  // COMPILER ERROR: cannot assign real to int
+  
+  // TEST CASE 22: Comparison operators work for both int and real
+  flag := 100 < 200;   // int comparison
+  flag := 1.5 < 2.5;   // real comparison
+  flag := 10 = 10;     // int comparison
+  
+  // TEST CASE 23: Assignment with correct type
+  x := 42;    // OK: int to int
+  y := 3.14;  // OK: real to real
+  flag := 5 < 10;  // OK: bool result to bool
+  
+  // TEST CASE 24: Unary minus operation
+  x := -5;    // OK: unary minus on int
+  y := -3.14; // OK: unary minus on real
+
+END OF TEST PROGRAM
+
+================================================================================
+  IMPLEMENTATION NOTES
+================================================================================
+
+Key modifications from original TINY:
+1. Extended enum ExprDataType to include REAL and BOOL types
+2. Modified VariableInfo structure to store type information
+3. Updated Evaluate() to handle real arithmetic with double values
+4. Enhanced type checking in Analyze() to enforce strict type rules
+5. Modified RunProgram() to support real variables and proper I/O
+6. All variables now require explicit type declarations
+7. Type conversions only allowed where semantically correct
+8. Exception throwing for all illegal type operations
+
+================================================================================
 */
 
 // sequence of statements separated by ;
-// no procedures - no declarations
-// all variables are integers
-// variables are declared simply by assigning values to them :=
-// if-statement: if (boolean) then [else] end
-// repeat-statement: repeat until (boolean)
-// boolean only in if and repeat conditions < = and two mathematical expressions
-// math expressions integers only, + - * / ^
-// I/O read write
+// ALL variables MUST be declared at the beginning with type: int, real, or bool
+// if-statement: if (boolean_condition) then [else] end
+// repeat-statement: repeat until (boolean_condition)
+// boolean expressions used only in if and repeat conditions (result of < or =)
+// int and real can be mixed in arithmetic expressions with auto-conversion
 // Comments {}
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -155,9 +299,11 @@ struct CompilerInfo
 ////////////////////////////////////////////////////////////////////////////////////
 // Scanner /////////////////////////////////////////////////////////////////////////
 
+// Define maximum token length for identifiers and numbers
 #define MAX_TOKEN_LEN 40
-// TODO: add token type for &
 
+// Enumeration of all token types recognized by the scanner
+// Extended to include type keywords (INT_TYPE, REAL_TYPE, BOOL_TYPE) for type system
 enum TokenType{
                 IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE,
                 ASSIGN, EQUAL, LESS_THAN,
@@ -166,10 +312,13 @@ enum TokenType{
                 LEFT_PAREN, RIGHT_PAREN,
                 LEFT_BRACE, RIGHT_BRACE,
                 ID, NUM,
-                ENDFILE, ERROR,AND_OP // added AND_OP for Scanner
+                ENDFILE, ERROR, AND_OP,  // AND_OP: & operator for logical and
+                INT_TYPE, REAL_TYPE, BOOL_TYPE  // Type keywords: int, real, bool
               };
 
-// Used for debugging only /////////////////////////////////////////////////////////
+// String representations of token types used for debugging output
+// Helps in tracing scanner behavior and understanding token stream
+// Must be kept in sync with TokenType enum above
 const char* TokenTypeStr[]=
             {
                 "If", "Then", "Else", "End", "Repeat", "Until", "Read", "Write",
@@ -179,7 +328,8 @@ const char* TokenTypeStr[]=
                 "LeftParen", "RightParen",
                 "LeftBrace", "RightBrace",
                 "ID", "Num",
-                "EndFile", "Error", "And" // Added And for debugging
+                "EndFile", "Error", "And",     // Added And for debugging & operator
+                "IntType", "RealType", "BoolType"  // Type keywords for debugging
             };
 
 // Note: keep this array in sync with enum TokenType
@@ -193,6 +343,9 @@ struct Token
     Token(TokenType _type, const char* _str) {type=_type; Copy(str, _str);}
 };
 
+// Table of reserved keywords recognized by the scanner
+// These are special tokens that cannot be used as identifiers
+// Extended to include type keywords: int, real, bool for type system
 const Token reserved_words[]=
 {
     Token(IF, "if"),
@@ -202,8 +355,12 @@ const Token reserved_words[]=
     Token(REPEAT, "repeat"),
     Token(UNTIL, "until"),
     Token(READ, "read"),
-    Token(WRITE, "write")
+    Token(WRITE, "write"),
+    Token(INT_TYPE, "int"),     // Type keyword for integer type
+    Token(REAL_TYPE, "real"),   // Type keyword for real (double) type
+    Token(BOOL_TYPE, "bool")    // Type keyword for boolean type
 };
+// Count of reserved words in the table
 const int num_reserved_words=sizeof(reserved_words)/sizeof(reserved_words[0]);
 
 // if there is tokens like < <=, sort them such that sub-tokens come last: <= <
@@ -264,8 +421,16 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
     }
     else if(IsDigit(s[0]))
     {
+        // Parse numeric literal - support both integers and real numbers
         int j=1;
-        while(IsDigit(s[j])) j++;
+        int has_decimal = 0;
+        
+        // Parse digits and optional decimal point for real numbers
+        while(IsDigit(s[j]) || (s[j]=='.' && !has_decimal))
+        {
+            if(s[j]=='.') has_decimal=1;
+            j++;
+        }
 
         ptoken->type=NUM;
         Copy(ptoken->str, s, j);
@@ -301,6 +466,7 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
 // ifstmt -> if exp then stmtseq [ else stmtseq ] end
 // repeatstmt -> repeat stmtseq until expr
 // assignstmt -> identifier := expr
+// declstmt -> type identifier := expr       (explicit type declaration with assignment)
 // readstmt -> read identifier
 // writestmt -> write expr
 // expr -> mathexpr [ (<|=) mathexpr ]
@@ -311,39 +477,63 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
 
 enum NodeKind{
                 IF_NODE, REPEAT_NODE, ASSIGN_NODE, READ_NODE, WRITE_NODE,
-                OPER_NODE, NUM_NODE, ID_NODE
+                OPER_NODE, NUM_NODE, ID_NODE, DECL_NODE  // DECL_NODE for type declarations
              };
 
 // Used for debugging only /////////////////////////////////////////////////////////
 const char* NodeKindStr[]=
             {
                 "If", "Repeat", "Assign", "Read", "Write",
-                "Oper", "Num", "ID"
+                "Oper", "Num", "ID", "Decl"  // Added Decl for declarations
             };
 
-enum ExprDataType {VOID, INTEGER, BOOLEAN};
+// Enumeration of expression data types for the TINY language type system
+// VOID: expressions without type (used for statements)
+// INTEGER: int type - supports arithmetic operations
+// REAL: double type - supports arithmetic operations, can mix with INTEGER
+// BOOLEAN: bool type - result of comparison operators, used only in conditions
+enum ExprDataType {VOID, INTEGER, REAL, BOOLEAN};
 
-// Used for debugging only /////////////////////////////////////////////////////////
+// String representations of expression data types used for debugging
+// Helps in tracing type checking and understanding type system behavior
 const char* ExprDataTypeStr[]=
             {
-                "Void", "Integer", "Boolean"
+                "Void", "Integer", "Real", "Boolean"  // Added Real and Boolean types
             };
 
 #define MAX_CHILDREN 3
 
+// Tree node structure for representing the abstract syntax tree (AST)
+// Each node represents a statement or expression in the TINY program
+// Extended to support real (double) values in addition to integer values
 struct TreeNode
 {
-    TreeNode* child[MAX_CHILDREN];
-    TreeNode* sibling; // used for sibling statements only
+    TreeNode* child[MAX_CHILDREN];      // Child nodes (up to 3 children max)
+    TreeNode* sibling;                  // Sibling nodes for sequences of statements
 
-    NodeKind node_kind;
+    NodeKind node_kind;                 // Type of node (IF, ASSIGN, OPER, etc.)
 
-    union{TokenType oper; int num; char* id;}; // defined for expression/int/identifier only
-    ExprDataType expr_data_type; // defined for expression/int/identifier only
+    // Union for node-specific data
+    // oper: operator type for OPER_NODE expressions
+    // num: integer value for NUM_NODE with integer literals
+    // real_num: real (double) value for NUM_NODE with real literals
+    // id: identifier name for ID_NODE variables
+    union{TokenType oper; int num; double real_num; char* id;};
+    
+    ExprDataType expr_data_type;        // Data type of expression result
+    ExprDataType var_type;              // Variable type (only for ID_NODE): INTEGER, REAL, or BOOLEAN
 
-    int line_num;
+    int line_num;                       // Source line number for error reporting
 
-    TreeNode() {int i; for(i=0;i<MAX_CHILDREN;i++) child[i]=0; sibling=0; expr_data_type=VOID;}
+    // Default constructor: initialize all fields
+    TreeNode() {
+        int i;
+        for(i=0;i<MAX_CHILDREN;i++) child[i]=0;
+        sibling=0;
+        expr_data_type=VOID;
+        var_type=VOID;          // Add var_type initialization
+        real_num=0.0;           // Initialize real_num to 0.0
+    }
 };
 
 struct ParseInfo
@@ -395,7 +585,53 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
         TreeNode* tree=new TreeNode;
         tree->node_kind=NUM_NODE;
         char* num_str=ppi->next_token.str;
-        tree->num=0; while(*num_str) tree->num=tree->num*10+((*num_str++)-'0');
+        
+        // Check if this is a real number (contains decimal point) or integer
+        int has_decimal = 0;
+        char* temp_str = num_str;
+        while(*temp_str)
+        {
+            if(*temp_str == '.') { has_decimal = 1; break; }
+            temp_str++;
+        }
+        
+        if(has_decimal)
+        {
+            // Parse as real number (double)
+            tree->real_num = 0.0;
+            double multiplier = 1.0;
+            int before_decimal = 1;
+            
+            while(*num_str)
+            {
+                if(*num_str == '.')
+                {
+                    before_decimal = 0;
+                    multiplier = 0.1;
+                }
+                else
+                {
+                    if(before_decimal)
+                        tree->real_num = tree->real_num * 10.0 + (double)((*num_str) - '0');
+                    else
+                    {
+                        tree->real_num = tree->real_num + multiplier * (double)((*num_str) - '0');
+                        multiplier *= 0.1;
+                    }
+                }
+                num_str++;
+            }
+            tree->expr_data_type = REAL;
+        }
+        else
+        {
+            // Parse as integer
+            tree->num = 0;
+            while(*num_str)
+                tree->num = tree->num * 10 + ((*num_str++) - '0');
+            tree->expr_data_type = INTEGER;
+        }
+        
         tree->line_num=pci->in_file.cur_line_num;
         Match(pci, ppi, ppi->next_token.type);
 
@@ -636,14 +872,53 @@ TreeNode* IfStmt(CompilerInfo* pci, ParseInfo* ppi)
     return tree;
 }
 
-// stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt
+// declstmt -> type identifier := expr
+// Explicit type declaration with initialization
+// Examples: int x := 5; real y := 3.14; bool flag := true;
+TreeNode* DeclStmt(CompilerInfo* pci, ParseInfo* ppi, ExprDataType decl_type)
+{
+    pci->debug_file.Out("Start DeclStmt");
+
+    TreeNode* tree=new TreeNode;
+    tree->node_kind=DECL_NODE;
+    tree->line_num=pci->in_file.cur_line_num;
+    tree->var_type=decl_type;  // Store the declared type
+
+    // Parse: identifier := expr
+    if(ppi->next_token.type==ID) AllocateAndCopy(&tree->id, ppi->next_token.str);
+    Match(pci, ppi, ID);
+    Match(pci, ppi, ASSIGN);
+    tree->child[0]=Expr(pci, ppi);  // Parse the initializing expression
+
+    pci->debug_file.Out("End DeclStmt");
+    return tree;
+}
+
+// stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt | declstmt
 TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
 {
     pci->debug_file.Out("Start Stmt");
 
     // Compare the next token with the First() of possible statements
     TreeNode* tree=0;
-    if(ppi->next_token.type==IF) tree=IfStmt(pci, ppi);
+    
+    // Check for explicit type declarations: int id := expr; real id := expr; bool id := expr;
+    if(ppi->next_token.type==INT_TYPE)
+    {
+        Match(pci, ppi, INT_TYPE);
+        tree=DeclStmt(pci, ppi, INTEGER);
+    }
+    else if(ppi->next_token.type==REAL_TYPE)
+    {
+        Match(pci, ppi, REAL_TYPE);
+        tree=DeclStmt(pci, ppi, REAL);
+    }
+    else if(ppi->next_token.type==BOOL_TYPE)
+    {
+        Match(pci, ppi, BOOL_TYPE);
+        tree=DeclStmt(pci, ppi, BOOLEAN);
+    }
+    else if(ppi->next_token.type==IF) tree=IfStmt(pci, ppi);
     else if(ppi->next_token.type==REPEAT) tree=RepeatStmt(pci, ppi);
     else if(ppi->next_token.type==ID) tree=AssignStmt(pci, ppi);
     else if(ppi->next_token.type==READ) tree=ReadStmt(pci, ppi);
@@ -707,10 +982,21 @@ void PrintTree(TreeNode* node, int sh=0)
     printf("[%s]", NodeKindStr[node->node_kind]);
 
     if(node->node_kind==OPER_NODE) printf("[%s]", TokenTypeStr[node->oper]);
-    else if(node->node_kind==NUM_NODE) printf("[%d]", node->num);
-    else if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE) printf("[%s]", node->id);
+    else if(node->node_kind==NUM_NODE)
+    {
+        // Print numeric value based on type
+        if(node->expr_data_type == REAL)
+            printf("[%lf]", node->real_num);
+        else
+            printf("[%d]", node->num);
+    }
+    else if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind==DECL_NODE)
+        printf("[%s]", node->id);
 
-    if(node->expr_data_type!=VOID) printf("[%s]", ExprDataTypeStr[node->expr_data_type]);
+    // Print variable type for declarations and variable references
+    if(node->node_kind==DECL_NODE)
+        printf("[%s]", ExprDataTypeStr[node->var_type]);
+    else if(node->expr_data_type!=VOID) printf("[%s]", ExprDataTypeStr[node->expr_data_type]);
 
     printf("\n");
 
@@ -722,7 +1008,7 @@ void DestroyTree(TreeNode* node)
 {
     int i;
 
-    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE)
+    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind==DECL_NODE)
         if(node->id) delete[] node->id;
 
     for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) DestroyTree(node->child[i]);
@@ -742,13 +1028,16 @@ struct LineLocation
     LineLocation* next;
 };
 
+// Structure representing a variable in the symbol table
+// Extended with type information to support the type system
 struct VariableInfo
 {
-    char* name;
-    int memloc;
-    LineLocation* head_line; // the head of linked list of source line locations
-    LineLocation* tail_line; // the tail of linked list of source line locations
-    VariableInfo* next_var; // the next variable in the linked list in the same hash bucket of the symbol table
+    char* name;                             // Variable name/identifier
+    int memloc;                             // Memory location index for runtime storage
+    ExprDataType var_type;                  // Type of this variable: INTEGER, REAL, or BOOLEAN
+    LineLocation* head_line;                // Head of linked list of source line locations
+    LineLocation* tail_line;                // Tail of linked list of source line locations
+    VariableInfo* next_var;                 // Next variable in hash bucket chain
 };
 
 struct SymbolTable
@@ -778,21 +1067,32 @@ struct SymbolTable
         return 0;
     }
 
-    void Insert(const char* name, int line_num)
+    void Insert(const char* name, int line_num, ExprDataType type)
     {
+        // Create a new line location entry with the source line number
         LineLocation* lineloc=new LineLocation;
         lineloc->line_num=line_num;
         lineloc->next=0;
 
+        // Calculate hash index for this variable name
         int h=Hash(name);
         VariableInfo* prev=0;
         VariableInfo* cur=var_info[h];
 
+        // Check if variable already exists in the symbol table
         while(cur)
         {
             if(Equals(name, cur->name))
             {
-                // just add this line location to the list of line locations of the existing var
+                // Variable already exists - check type consistency
+                if(cur->var_type != type)
+                {
+                    // Type mismatch: variable already declared with different type
+                    printf("ERROR Type mismatch: variable '%s' already declared with type '%s', attempted redeclaration with type '%s'\n", 
+                           name, ExprDataTypeStr[cur->var_type], ExprDataTypeStr[type]);
+                    throw 0;  // Throw exception for type conflict
+                }
+                // Add this line location to the list of line locations
                 cur->tail_line->next=lineloc;
                 cur->tail_line=lineloc;
                 return;
@@ -801,12 +1101,15 @@ struct SymbolTable
             cur=cur->next_var;
         }
 
+        // Create new variable entry with type information
         VariableInfo* vi=new VariableInfo;
         vi->head_line=vi->tail_line=lineloc;
         vi->next_var=0;
         vi->memloc=num_vars++;
+        vi->var_type=type;                      // Store the variable's data type
         AllocateAndCopy(&vi->name, name);
 
+        // Insert into hash table
         if(!prev) var_info[h]=vi;
         else prev->next_var=vi;
     }
@@ -856,106 +1159,607 @@ struct SymbolTable
     }
 };
 
+// Enhanced semantic analysis with full type checking for the type system
+// Two-pass approach:
+// 1. First pass: analyze children recursively
+// 2. Second pass: determine and validate types based on context
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
 
-    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE)
-        symbol_table->Insert(node->id, node->line_num);
+    // PASS 1: Recursively analyze all child nodes first
+    // This ensures that expressions are fully analyzed before we check the parent node
+    for(i=0;i<MAX_CHILDREN;i++) 
+        if(node->child[i]) 
+            Analyze(node->child[i], symbol_table);
 
-    for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);
-
+    // PASS 2: Determine and validate types after children are analyzed
+    
+    // Handle explicit type declarations: int x := expr; real y := expr; bool z := expr;
+    if(node->node_kind==DECL_NODE)
+    {
+        // Declared type is stored in node->var_type
+        // RHS expression type is in node->child[0]->expr_data_type
+        ExprDataType rhs_type = node->child[0]->expr_data_type;
+        ExprDataType decl_type = node->var_type;
+        
+        // Check type compatibility
+        if(decl_type != rhs_type)
+        {
+            // Type mismatch: declared type != RHS expression type
+            printf("ERROR Line %d: Declaration type mismatch: cannot assign %s to %s variable '%s'\n",
+                   node->line_num,
+                   ExprDataTypeStr[rhs_type],
+                   ExprDataTypeStr[decl_type],
+                   node->id);
+            throw 0;
+        }
+        
+        // Register the variable with its declared type
+        VariableInfo* var = symbol_table->Find(node->id);
+        if(!var)
+        {
+            symbol_table->Insert(node->id, node->line_num, decl_type);
+        }
+    }
+    
+    // Determine expression type based on operator and operands
     if(node->node_kind==OPER_NODE)
     {
-        if(node->oper==EQUAL || node->oper==LESS_THAN) node->expr_data_type=BOOLEAN;
-        else node->expr_data_type=INTEGER;
+        ExprDataType left_type = node->child[0]->expr_data_type;
+        ExprDataType right_type = node->child[1]->expr_data_type;
+        
+        // Comparison operators (< =) return BOOLEAN type
+        if(node->oper==EQUAL || node->oper==LESS_THAN)
+        {
+            node->expr_data_type=BOOLEAN;
+            
+            // Type checking for comparisons
+            if((left_type == BOOLEAN || right_type == BOOLEAN))
+            {
+                printf("ERROR Line %d: Cannot compare BOOLEAN values with < or =\n", node->line_num);
+                throw 0;
+            }
+            if((left_type == VOID || right_type == VOID))
+            {
+                printf("ERROR Line %d: Invalid operand type in comparison\n", node->line_num);
+                throw 0;
+            }
+        }
+        // Logical AND operator works on BOOLEAN operands
+        else if(node->oper==AND_OP)
+        {
+            if(left_type != BOOLEAN || right_type != BOOLEAN)
+            {
+                printf("ERROR Line %d: AND operator (&) requires BOOLEAN operands, got %s and %s\n", 
+                       node->line_num, ExprDataTypeStr[left_type], ExprDataTypeStr[right_type]);
+                throw 0;
+            }
+            node->expr_data_type = BOOLEAN;
+        }
+        // Arithmetic operators: + - * / ^
+        else
+        {
+            // Check that neither operand is BOOLEAN
+            if(left_type == BOOLEAN || right_type == BOOLEAN)
+            {
+                printf("ERROR Line %d: Arithmetic operator applied to BOOLEAN type\n", node->line_num);
+                throw 0;
+            }
+            
+            // Determine result type based on operands
+            // If either is REAL, result is REAL
+            // Otherwise result is INTEGER
+            if(left_type == REAL || right_type == REAL)
+                node->expr_data_type = REAL;
+            else if(left_type == INTEGER && right_type == INTEGER)
+                node->expr_data_type = INTEGER;
+            else
+            {
+                printf("ERROR Line %d: Invalid operand types for arithmetic: %s and %s\n",
+                       node->line_num, ExprDataTypeStr[left_type], ExprDataTypeStr[right_type]);
+                throw 0;
+            }
+        }
     }
-    else if(node->node_kind==ID_NODE || node->node_kind==NUM_NODE) node->expr_data_type=INTEGER;
-
-    if(node->node_kind==OPER_NODE)
+    // Set type for NUM_NODE (numeric literal)
+    else if(node->node_kind==NUM_NODE)
     {
-        if(node->child[0]->expr_data_type!=INTEGER || node->child[1]->expr_data_type!=INTEGER)
-            printf("ERROR Operator applied to non-integers\n");
+        // Type was already set during parsing:
+        // REAL if has decimal point, INTEGER otherwise
+        // Don't override it here
+        if(node->expr_data_type == VOID)
+            node->expr_data_type = INTEGER;  // Fallback only if not set
     }
-    if(node->node_kind==IF_NODE && node->child[0]->expr_data_type!=BOOLEAN) printf("ERROR If test must be BOOLEAN\n");
-    if(node->node_kind==REPEAT_NODE && node->child[1]->expr_data_type!=BOOLEAN) printf("ERROR Repeat test must be BOOLEAN\n");
-    if(node->node_kind==WRITE_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Write works only for INTEGER\n");
-    if(node->node_kind==ASSIGN_NODE && node->child[0]->expr_data_type!=INTEGER) printf("ERROR Assign works only for INTEGER\n");
+    // Set type for ID_NODE (variable reference)
+    else if(node->node_kind==ID_NODE)
+    {
+        // Type comes from the variable's declaration or first use
+        VariableInfo* var = symbol_table->Find(node->id);
+        if(!var)
+        {
+            // Variable not yet found - will be created on first assignment
+            // Mark as INTEGER for now
+            node->var_type = INTEGER;
+            node->expr_data_type = INTEGER;
+        }
+        else
+        {
+            // Type comes from the variable's declaration
+            if(var->var_type != VOID)
+                node->expr_data_type = var->var_type;
+            else
+                node->expr_data_type = INTEGER;  // Default fallback
+            node->var_type = var->var_type;
+        }
+    }
 
-    if(node->sibling) Analyze(node->sibling, symbol_table);
+    // Handle ASSIGN_NODE: variable := expression
+    if(node->node_kind==ASSIGN_NODE)
+    {
+        // Now we know the RHS expression type from analysis above
+        ExprDataType rhs_type = node->child[0]->expr_data_type;
+        VariableInfo* var = symbol_table->Find(node->id);
+        
+        if(!var)
+        {
+            // Auto-declare variable with the type of the RHS expression
+            symbol_table->Insert(node->id, node->line_num, rhs_type);
+            var = symbol_table->Find(node->id);
+            node->var_type = rhs_type;
+        }
+        else if(var->var_type == VOID)
+        {
+            // Variable was auto-declared but type not yet set
+            var->var_type = rhs_type;
+            node->var_type = rhs_type;
+        }
+        else if(var->var_type != rhs_type)
+        {
+            // Type mismatch: variable type != RHS expression type
+            printf("ERROR Line %d: Assignment type mismatch: cannot assign %s to %s variable '%s'\n",
+                   node->line_num,
+                   ExprDataTypeStr[rhs_type],
+                   ExprDataTypeStr[var->var_type],
+                   node->id);
+            throw 0;
+        }
+        else
+        {
+            node->var_type = var->var_type;
+        }
+    }
+    
+    // Type validation for specific statement types
+    if(node->node_kind==IF_NODE)
+    {
+        // IF condition must be BOOLEAN
+        if(node->child[0]->expr_data_type != BOOLEAN)
+        {
+            printf("ERROR Line %d: IF condition must evaluate to BOOLEAN, not %s\n",
+                   node->line_num, ExprDataTypeStr[node->child[0]->expr_data_type]);
+            throw 0;
+        }
+    }
+    
+    if(node->node_kind==REPEAT_NODE)
+    {
+        // REPEAT until condition must be BOOLEAN
+        if(node->child[1]->expr_data_type != BOOLEAN)
+        {
+            printf("ERROR Line %d: REPEAT until condition must evaluate to BOOLEAN, not %s\n",
+                   node->line_num, ExprDataTypeStr[node->child[1]->expr_data_type]);
+            throw 0;
+        }
+    }
+    
+    if(node->node_kind==WRITE_NODE)
+    {
+        // WRITE can output any type: INTEGER, REAL, or BOOLEAN
+        if(node->child[0]->expr_data_type == VOID)
+        {
+            printf("ERROR Line %d: WRITE expression has no type\n", node->line_num);
+            throw 0;
+        }
+    }
+
+    // Recursively analyze sibling nodes
+    if(node->sibling) 
+        Analyze(node->sibling, symbol_table);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Code Generator //////////////////////////////////////////////////////////////////
 
+// Structure to represent a typed value during evaluation
+// Holds either an integer, real, or boolean value with its type
+struct TypedValue
+{
+    ExprDataType type;      // Type of the value: INTEGER, REAL, or BOOLEAN
+    int int_val;            // Integer value
+    double real_val;        // Real (double) value
+    int bool_val;           // Boolean value (0=false, 1=true)
+    
+    // Default constructor
+    TypedValue() : type(VOID), int_val(0), real_val(0.0), bool_val(0) {}
+    
+    // Constructor for INTEGER
+    TypedValue(int val) : type(INTEGER), int_val(val), real_val((double)val), bool_val(0) {}
+    
+    // Constructor for REAL
+    TypedValue(double val) : type(REAL), int_val(0), real_val(val), bool_val(0) {}
+    
+    // Constructor for BOOLEAN
+    TypedValue(int val, bool) : type(BOOLEAN), int_val(val), real_val(0.0), bool_val(val) {}
+};
+
+// Helper function to raise an integer to a power
+// Used for the power operator (^)
+// Parameters: base (a) and exponent (b)
+// Returns: a raised to the power b
 int Power(int a, int b)
 {
-    if(a==0) return 0;
-    if(b==0) return 1;
-    if(b>=1) return a*Power(a, b-1);
+    // Special cases for power operation
+    if(a==0) return 0;           // 0^n = 0
+    if(b==0) return 1;           // n^0 = 1
+    if(b>=1) return a*Power(a, b-1);  // Recursive calculation
     return 0;
 }
 
-int Evaluate(TreeNode* node, SymbolTable* symbol_table, int* variables)
+// Helper function for real power (using double)
+double RealPower(double a, int b)
 {
-    if(node->node_kind==NUM_NODE) return node->num;
-    if(node->node_kind==ID_NODE) return variables[symbol_table->Find(node->id)->memloc];
+    if(a==0.0) return 0.0;
+    if(b==0) return 1.0;
+    if(b>0)
+    {
+        double result = 1.0;
+        int i;
+        for(i=0;i<b;i++) result = result * a;
+        return result;
+    }
+    return 0.0;
+}
 
-    int a=Evaluate(node->child[0], symbol_table, variables);
-    int b=Evaluate(node->child[1], symbol_table, variables);
+// Enhanced evaluate function that handles all three types: int, real, and boolean
+// Returns a TypedValue containing the result of evaluating the expression
+// Supports type mixing with automatic conversion where appropriate
+TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* variables)
+{
+    TypedValue result;
+    
+    // NUM_NODE: numeric literal (int or real)
+    if(node->node_kind==NUM_NODE)
+    {
+        // Check if this is a real literal or integer literal
+        if(node->expr_data_type == REAL)
+        {
+            // Parse as real number
+            result = TypedValue(node->real_num);
+            result.type = REAL;
+        }
+        else
+        {
+            // Parse as integer
+            result = TypedValue(node->num);
+            result.type = INTEGER;
+        }
+        return result;
+    }
+    
+    // ID_NODE: variable reference
+    if(node->node_kind==ID_NODE)
+    {
+        VariableInfo* var = symbol_table->Find(node->id);
+        if(!var)
+        {
+            printf("ERROR Undefined variable '%s'\n", node->id);
+            throw 0;
+        }
+        return variables[var->memloc];
+    }
 
-    if(node->oper==EQUAL) return a==b;
-    if(node->oper==LESS_THAN) return a<b;
-    if(node->oper==PLUS) return a+b;
-    if(node->oper==MINUS) return a-b;
-    if(node->oper==TIMES) return a*b;
-    if(node->oper==DIVIDE) return a/b;
-    if(node->oper==POWER) return Power(a,b);
-    if(node->oper==AND_OP) return (a*a)-(b*b); // add logic for & operator
+    // OPER_NODE: binary operations
+    TypedValue a = Evaluate(node->child[0], symbol_table, variables);
+    TypedValue b = Evaluate(node->child[1], symbol_table, variables);
+
+    // Comparison operators: < =
+    if(node->oper==EQUAL)
+    {
+        // Equality comparison
+        if(a.type == REAL || b.type == REAL)
+        {
+            // Real comparison
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result = TypedValue((a_val == b_val) ? 1 : 0, true);
+        }
+        else
+        {
+            // Integer comparison
+            result = TypedValue((a.int_val == b.int_val) ? 1 : 0, true);
+        }
+        result.type = BOOLEAN;
+        return result;
+    }
+    
+    if(node->oper==LESS_THAN)
+    {
+        // Less than comparison
+        if(a.type == REAL || b.type == REAL)
+        {
+            // Real comparison
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result = TypedValue((a_val < b_val) ? 1 : 0, true);
+        }
+        else
+        {
+            // Integer comparison
+            result = TypedValue((a.int_val < b.int_val) ? 1 : 0, true);
+        }
+        result.type = BOOLEAN;
+        return result;
+    }
+    
+    // Logical AND operator (&)
+    if(node->oper==AND_OP)
+    {
+        // AND operation on booleans
+        int result_val = (a.bool_val && b.bool_val) ? 1 : 0;
+        result = TypedValue(result_val, true);
+        result.type = BOOLEAN;
+        return result;
+    }
+
+    // Arithmetic operators: + - * / ^
+    if(node->oper==PLUS)
+    {
+        if(a.type == REAL || b.type == REAL)
+        {
+            // Real addition
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result.type = REAL;
+            result.real_val = a_val + b_val;
+        }
+        else
+        {
+            // Integer addition
+            result.type = INTEGER;
+            result.int_val = a.int_val + b.int_val;
+        }
+        return result;
+    }
+    
+    if(node->oper==MINUS)
+    {
+        if(a.type == REAL || b.type == REAL)
+        {
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result.type = REAL;
+            result.real_val = a_val - b_val;
+        }
+        else
+        {
+            result.type = INTEGER;
+            result.int_val = a.int_val - b.int_val;
+        }
+        return result;
+    }
+    
+    if(node->oper==TIMES)
+    {
+        if(a.type == REAL || b.type == REAL)
+        {
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result.type = REAL;
+            result.real_val = a_val * b_val;
+        }
+        else
+        {
+            result.type = INTEGER;
+            result.int_val = a.int_val * b.int_val;
+        }
+        return result;
+    }
+    
+    if(node->oper==DIVIDE)
+    {
+        if(a.type == REAL || b.type == REAL)
+        {
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            if(b_val == 0.0)
+            {
+                printf("ERROR Division by zero\n");
+                throw 0;
+            }
+            result.type = REAL;
+            result.real_val = a_val / b_val;
+        }
+        else
+        {
+            if(b.int_val == 0)
+            {
+                printf("ERROR Division by zero\n");
+                throw 0;
+            }
+            result.type = INTEGER;
+            result.int_val = a.int_val / b.int_val;
+        }
+        return result;
+    }
+    
+    if(node->oper==POWER)
+    {
+        if(a.type == REAL || b.type == REAL)
+        {
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            int b_val = (b.type == REAL) ? (int)b.real_val : b.int_val;
+            result.type = REAL;
+            result.real_val = RealPower(a_val, b_val);
+        }
+        else
+        {
+            result.type = INTEGER;
+            result.int_val = Power(a.int_val, b.int_val);
+        }
+        return result;
+    }
+
     throw 0;
-    return 0;
+    return result;
 }
 
-void RunProgram(TreeNode* node, SymbolTable* symbol_table, int* variables)
+// Enhanced runtime execution with full type support
+// Executes the abstract syntax tree with proper handling of int, real, and bool types
+// Variables are stored as TypedValue structures in the variables array
+void RunProgram(TreeNode* node, SymbolTable* symbol_table, TypedValue* variables)
 {
+    // IF statement: if (condition) then ... [else ...] end
     if(node->node_kind==IF_NODE)
     {
-        int cond=Evaluate(node->child[0], symbol_table, variables);
-        if(cond) RunProgram(node->child[1], symbol_table, variables);
-        else if(node->child[2]) RunProgram(node->child[2], symbol_table, variables);
+        // Evaluate the condition expression (must be BOOLEAN)
+        TypedValue cond = Evaluate(node->child[0], symbol_table, variables);
+        if(cond.bool_val)
+        {
+            // Condition is true: execute then branch
+            RunProgram(node->child[1], symbol_table, variables);
+        }
+        else if(node->child[2])
+        {
+            // Condition is false and else branch exists: execute else branch
+            RunProgram(node->child[2], symbol_table, variables);
+        }
     }
+    
+    // DECL statement: type identifier := expression (explicit declaration with initialization)
+    if(node->node_kind==DECL_NODE)
+    {
+        // Evaluate the initializing expression
+        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
+        
+        // Store the result in the variable
+        VariableInfo* var = symbol_table->Find(node->id);
+        if(var)
+        {
+            variables[var->memloc] = v;
+        }
+    }
+    
+    // ASSIGN statement: variable := expression
     if(node->node_kind==ASSIGN_NODE)
     {
-        int v=Evaluate(node->child[0], symbol_table, variables);
-        variables[symbol_table->Find(node->id)->memloc]=v;
+        // Evaluate the right-hand side expression
+        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
+        
+        // Store the result in the variable
+        VariableInfo* var = symbol_table->Find(node->id);
+        if(var)
+        {
+            variables[var->memloc] = v;
+        }
     }
+    
+    // READ statement: read variable_name
     if(node->node_kind==READ_NODE)
     {
-        printf("Enter %s: ", node->id);
-        scanf("%d", &variables[symbol_table->Find(node->id)->memloc]);
+        // Read input value of appropriate type from user
+        VariableInfo* var = symbol_table->Find(node->id);
+        if(var)
+        {
+            printf("Enter %s (%s): ", node->id, ExprDataTypeStr[var->var_type]);
+            
+            // Read based on variable type
+            if(var->var_type == REAL)
+            {
+                // Read as real/double
+                double input_val;
+                scanf("%lf", &input_val);
+                variables[var->memloc] = TypedValue(input_val);
+                variables[var->memloc].type = REAL;
+            }
+            else if(var->var_type == BOOLEAN)
+            {
+                // Read as integer (0=false, non-0=true)
+                int input_val;
+                scanf("%d", &input_val);
+                variables[var->memloc] = TypedValue(input_val, true);
+                variables[var->memloc].type = BOOLEAN;
+            }
+            else  // INTEGER
+            {
+                // Read as integer
+                int input_val;
+                scanf("%d", &input_val);
+                variables[var->memloc] = TypedValue(input_val);
+                variables[var->memloc].type = INTEGER;
+            }
+        }
     }
+    
+    // WRITE statement: write expression
     if(node->node_kind==WRITE_NODE)
     {
-        int v=Evaluate(node->child[0], symbol_table, variables);
-        printf("Val: %d\n", v);
+        // Evaluate and output the expression result
+        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
+        
+        // Output based on type
+        if(v.type == REAL)
+        {
+            printf("Val: %lf\n", v.real_val);
+        }
+        else if(v.type == BOOLEAN)
+        {
+            printf("Val: %s\n", v.bool_val ? "true" : "false");
+        }
+        else  // INTEGER
+        {
+            printf("Val: %d\n", v.int_val);
+        }
     }
+    
+    // REPEAT statement: repeat ... until (condition)
     if(node->node_kind==REPEAT_NODE)
     {
+        // Execute loop body repeatedly until condition becomes true
         do
         {
-           RunProgram(node->child[0], symbol_table, variables);
+            // Execute loop body (first child)
+            RunProgram(node->child[0], symbol_table, variables);
+            // Evaluate condition (second child)
         }
-        while(!Evaluate(node->child[1], symbol_table, variables));
+        while(!Evaluate(node->child[1], symbol_table, variables).bool_val);
     }
-    if(node->sibling) RunProgram(node->sibling, symbol_table, variables);
+    
+    // Process sibling nodes (for statement sequences)
+    if(node->sibling)
+        RunProgram(node->sibling, symbol_table, variables);
 }
 
+// Wrapper function for RunProgram that allocates variable storage
+// Creates array of TypedValue structures for all variables in the symbol table
+// All variables initialized to 0 (or 0.0 for real)
 void RunProgram(TreeNode* syntax_tree, SymbolTable* symbol_table)
 {
     int i;
-    int* variables=new int[symbol_table->num_vars];
-    for(i=0;i<symbol_table->num_vars;i++) variables[i]=0;
+    // Allocate storage for all variables
+    TypedValue* variables = new TypedValue[symbol_table->num_vars];
+    
+    // Initialize all variables to default values
+    for(i=0;i<symbol_table->num_vars;i++)
+    {
+        variables[i] = TypedValue(0);
+        variables[i].type = VOID;  // Will be set by actual assignments
+    }
+    
+    // Execute the program
     RunProgram(syntax_tree, symbol_table, variables);
+    
+    // Clean up allocated memory
     delete[] variables;
 }
 

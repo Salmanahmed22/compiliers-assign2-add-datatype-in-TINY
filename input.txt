@@ -1,86 +1,35 @@
-{
-  Test cases for the new '&' operator
-  Definition: a & b = (a^2) - (b^2)
-  Precedence: higher than * and /, but lower than ^ (power)
-  Associativity: Left-to-right
-}
+int x := 5;
+real y := 3.5;
+bool flag := 5 < 10;
 
-{ 1. Simple usage }
-x := 5 & 3;
-write x;
+x := x + 3;
+x := x - 2;
+x := x * 4;
+x := x / 2;
+x := 2 ^ 3;
 
-{ 2. Another simple case }
-x := 4 & 1;
-write x;
+y := y + 2.5;
+y := y - 1.0;
+y := y * 2.0;
+y := y / 2.5;
 
-{ 3. Left associativity check }
-x := 7 & 3 & 1;
-write x;
+y := 5 + 3.5;
+y := 10 * 2.0;
 
-{ 4. Mixed with addition }
-x := 10 + 4 & 2;
-write x;
+flag := 5 < 10;
+flag := 10 = 10;
 
-{ 5. Mixed with subtraction }
-x := 20 - 3 & 1;
-write x;
+flag := 3.5 < 4.0;
+flag := 2.5 = 2.5;
 
-{ 6. Mixed with multiplication }
-x := 2 * 5 & 3;
-write x;
+if flag then
+  x := 100
+end;
 
-{ 7. Mixed with division }
-x := 32 / 4 & 2;
-write x;
+repeat
+  x := x + 1
+until x = 110;
 
-{ 8. Mixed with power (^) – precedence test }
-x := 2 ^ 3 & 1;
-write x;
-
-{ 9. Power on both sides }
-x := 3 ^ 2 & 2 ^ 1;
-write x;
-
-{ 10. Chain with other operators }
-x := 10 * 2 & 3 + 1;
-write x;
-
-{ 11. Parentheses override precedence }
-x := (10 * 2) & 3;
-write x;
-
-{ 12. More parentheses }
-x := 10 * (2 & 3);
-write x;
-
-{ 13. Mix of &, *, / }
-x := 100 / 5 * 3 & 2;
-write x;
-
-{ 14. Zero operand }
-x := 0 & 5;
-write x;
-
-{ 15. Another zero case }
-x := 5 & 0;
-write x;
-
-{ 16. Both zeros }
-x := 0 & 0;
-write x;
-
-{ 17. Negative numbers (if tiny supports unary minus) }
-x := -5 & 2;
-write x;
-
-{ 18. Complex mix }
-x := 4 + 3 * 6 & 2;
-write x;
-
-{ 19. Multiple & with mixed ops }
-x := 9 & 4 * 2 & 1;
-write x;
-
-{ 20. Stress test with parentheses and all operators }
-x := (2 ^ 3 & 1) * (4 + 5 & 2);
-write x;
+write x + 5;
+write y * 2.0;
+write 10 < 5
