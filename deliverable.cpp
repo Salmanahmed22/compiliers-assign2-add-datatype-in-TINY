@@ -25,97 +25,70 @@ y := y + 2.5;
 y := y - 1.0;
 y := y * 2.0;
 y := y / 2.5;
+
+{ Test 3: Mixed type arithmetic (int to real conversion) }
+y := 5 + 3.5;
+y := 10 * 2.0;
+
+{ Test 4: Comparison operators returning boolean }
+flag := 5 < 10;
+flag := 10 = 10;
+flag := 3 > 5;
+flag := 4 >= 4;
+flag := 2 <= 3;
+
+{ Test 5: Real comparisons }
+flag := 3.5 < 4.0;
+flag := 2.5 = 2.5;
+flag := 4.0 > 3.5;
+flag := 3.0 >= 3.0;
+flag := 2.5 <= 3.0;
+
+{ Test 6: Conditional with boolean }
+if flag then
+  x := 100
+end;
+
+{ Test 7: Repeat loop }
+repeat
+  x := x + 1
+until x = 110;
+
+{ Test 8: Write results }
+write x + 5;
+write y * 2.0;
+write 10 < 5;
+write 5 > 3;
+write 4 >= 4;
+write 2 <= 3;
 */
-enum TokenType{
-                IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE,
-                ASSIGN, EQUAL, LESS_THAN, GREATER_THAN, GREATER_EQUAL, LESS_EQUAL, // Comparison operators
-                PLUS, MINUS, TIMES, DIVIDE, POWER,
-                SEMI_COLON,
-                LEFT_PAREN, RIGHT_PAREN,
-                LEFT_BRACE, RIGHT_BRACE,
-                ID, NUM,
-                ENDFILE, ERROR, AND_OP,  // added AND_OP for Scanner
-                INT_TYPE, REAL_TYPE, BOOL_TYPE  // Type keywords: int, real, bool
+enum TokenType
+{
+    ASSIGN, EQUAL, LESS_THAN, GREATER_THAN, GREATER_EQUAL, LESS_EQUAL, // Comparison operators
+    INT_TYPE, REAL_TYPE, BOOL_TYPE  // Type keywords: int, real, bool
 };
 
 const char* TokenTypeStr[]=
-            {
-                "If", "Then", "Else", "End", "Repeat", "Until", "Read", "Write",
-                "Assign", "Equal", "LessThan", "GreaterThan", "GreaterEqual", "LessEqual", // Comparison operators for debugging
-                "Plus", "Minus", "Times", "Divide", "Power",
-                "SemiColon",
-                "LeftParen", "RightParen",
-                "LeftBrace", "RightBrace",
-                "ID", "Num",
-                "EndFile", "Error", "And",     /// added AND_OP for Scanner
-                "IntType", "RealType", "BoolType"  // Type keywords for debugging
+{
+    "Assign", "Equal", "LessThan", "GreaterThan", "GreaterEqual", "LessEqual", // Comparison operators for debugging
+    "IntType", "RealType", "BoolType"  // Type keywords for debugging
 };
 
 const Token reserved_words[]=
 {
-    Token(IF, "if"),
-    Token(THEN, "then"),
-    Token(ELSE, "else"),
-    Token(END, "end"),
-    Token(REPEAT, "repeat"),
-    Token(UNTIL, "until"),
-    Token(READ, "read"),
-    Token(WRITE, "write"),
     Token(INT_TYPE, "int"),     // Type keyword for integer type
     Token(REAL_TYPE, "real"),   // Type keyword for real (double) type
     Token(BOOL_TYPE, "bool")    // Type keyword for boolean type
 };
 const Token symbolic_tokens[]=
 {
-    Token(ASSIGN, ":="),
-    Token(EQUAL, "="),
     Token(GREATER_EQUAL, ">="),  // add >=
     Token(LESS_EQUAL, "<="),     // add <=
     Token(GREATER_THAN, ">"),    // add >
-    Token(LESS_THAN, "<"),
-    Token(PLUS, "+"),
-    Token(MINUS, "-"),
-    Token(TIMES, "*"),
-    Token(DIVIDE, "/"),
-    Token(POWER, "^"),
-    Token(SEMI_COLON, ";"),
-    Token(LEFT_PAREN, "("),
-    Token(RIGHT_PAREN, ")"),
-    Token(LEFT_BRACE, "{"),
-    Token(RIGHT_BRACE, "}"),
-    Token(AND_OP,"&") // Added & as symbolic token
 };
 
-void GetNextToken(CompilerInfo* pci, Token* ptoken){
-    ptoken->type=ERROR;
-    ptoken->str[0]=0;
-
-    int i;
-    char* s=pci->in_file.GetNextTokenStr();
-    if(!s)
-    {
-        ptoken->type=ENDFILE;
-        ptoken->str[0]=0;
-        return;
-    }
-
-    for(i=0;i<num_symbolic_tokens;i++)
-    {
-        if(StartsWith(s, symbolic_tokens[i].str))
-            break;
-    }
-
-    if(i<num_symbolic_tokens)
-    {
-        if(symbolic_tokens[i].type==LEFT_BRACE)
-        {
-            pci->in_file.Advance(strlen(symbolic_tokens[i].str));
-            if(!pci->in_file.SkipUpto(symbolic_tokens[i+1].str)) return;
-            return GetNextToken(pci, ptoken);
-        }
-        ptoken->type=symbolic_tokens[i].type;
-        Copy(ptoken->str, symbolic_tokens[i].str);
-    }
+void GetNextToken(CompilerInfo* pci, Token* ptoken)
+{
     else if(IsDigit(s[0]))
     {
         // Parse numeric variable - support both integers and real numbers
@@ -128,124 +101,46 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken){
             if(s[j]=='.') has_decimal=1;
             j++;
         }
-
+        
         ptoken->type=NUM;
         Copy(ptoken->str, s, j);
     }
-    else if(IsLetterOrUnderscore(s[0]))
-    {
-        int j=1;
-        while(IsLetterOrUnderscore(s[j])) j++;
-
-        ptoken->type=ID;
-        Copy(ptoken->str, s, j);
-
-        for(i=0;i<num_reserved_words;i++)
-        {
-            if(Equals(ptoken->str, reserved_words[i].str))
-            {
-                ptoken->type=reserved_words[i].type;
-                break;
-            }
-        }
-    }
-
-    int len=strlen(ptoken->str);
-    if(len>0) pci->in_file.Advance(len);
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// Parser //////////////////////////////////////////////////////////////////////////
-
-// program -> stmtseq
-// stmtseq -> stmt { ; stmt }
 // stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt | declstmt
-// ifstmt -> if exp then stmtseq [ else stmtseq ] end
-// repeatstmt -> repeat stmtseq until expr
-// assignstmt -> identifier := expr
 // declstmt -> type identifier := expr       (explicit type declaration with assignment)
-// readstmt -> read identifier
-// writestmt -> write expr
-// expr -> mathexpr [ (<|=) mathexpr ]
-// mathexpr -> term { (+|-) term }    left associative
-// term -> factor { (*|/) factor }    left associative
-// factor -> newexpr { ^ newexpr }    right associative
-// newexpr -> ( mathexpr ) | number | identifier
 
-enum NodeKind{
-                IF_NODE, REPEAT_NODE, ASSIGN_NODE, READ_NODE, WRITE_NODE,
-                OPER_NODE, NUM_NODE, ID_NODE, DECL_NODE  // DECL_NODE for type declarations
+enum NodeKind
+{
+    DECL_NODE  // DECL_NODE for type declarations
 };
 
 const char* NodeKindStr[]=
-            {
-                "If", "Repeat", "Assign", "Read", "Write",
-                "Oper", "Num", "ID", "Decl"  // Added Decl for for debugging 
-            };
+{
+    "Decl"  // Added Decl for for debugging 
+};
 
-
-enum ExprDataType {VOID, INTEGER, REAL, BOOLEAN}; // added REAL type
-
+enum ExprDataType {REAL}; // added REAL type
 
 const char* ExprDataTypeStr[]=
 {
-    "Void", "Integer", "Real", "Boolean"  // Added Real type for debugging
+    "Real"  // Added Real type for debugging
 };
 
 #define MAX_CHILDREN 3
 struct TreeNode
 {
-    TreeNode* child[MAX_CHILDREN];
-    TreeNode* sibling;
-
-    NodeKind node_kind;
-
-    
     union{TokenType oper; int num; double real_num; char* id;}; // added real_num for real values
     
     ExprDataType expr_data_type;        // Data type of RHS expression result -> already exists
-    ExprDataType var_type;              // Variable type (only for ID_NODE): INTEGER, REAL, or BOOLEAN
-
-    int line_num;                       
-
+    ExprDataType var_type;              // Variable type (only for ID_NODE): INTEGER, REAL, or BOOLEAN                       
     
-        TreeNode() {int i; for(i=0;i<MAX_CHILDREN;i++) child[i]=0; sibling=0; expr_data_type=VOID;var_type=VOID;real_num=0.0;}
-
+    TreeNode() {int i; for(i=0;i<MAX_CHILDREN;i++) child[i]=0; sibling=0; expr_data_type=VOID;var_type=VOID;real_num=0.0;}
 };
 
 TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
 {
-    pci->debug_file.Out("Start NewExpr");
-
-    // Compare the next token with the First() of possible statements
-    // handle unary minus: produce (0 - newexpr)
-    if(ppi->next_token.type==MINUS)
-    {
-        TreeNode* new_tree=new TreeNode;
-        new_tree->node_kind=OPER_NODE;
-        new_tree->oper=MINUS;
-        new_tree->line_num=pci->in_file.cur_line_num;
-
-        // left child is numeric zero
-        TreeNode* zero=new TreeNode;
-        zero->node_kind=NUM_NODE;
-        zero->num=0;
-
-        Match(pci, ppi, MINUS);
-        new_tree->child[0]=zero;
-        new_tree->child[1]=NewExpr(pci, ppi);
-
-        pci->debug_file.Out("End NewExpr");
-        return new_tree;
-    }
-    if(ppi->next_token.type==NUM)
-    {
-        TreeNode* tree=new TreeNode;
-        tree->node_kind=NUM_NODE;
-        char* num_str=ppi->next_token.str;
-        
-        // remove the loop parsing as integer only
-        // check if the number contains a decimal point
+            // Check if this is a real number (contains decimal point) or integer
         int has_decimal = 0;
         char* temp_str = num_str;
         while(*temp_str)
@@ -256,6 +151,7 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
         
         if(has_decimal)
         {
+            // Parse as real number (double)
             tree->real_num = 0.0;
             double multiplier = 1.0;
             int before_decimal = 1;
@@ -283,70 +179,20 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
         }
         else
         {
-            // Parse as integer -> already exists
+            // Parse as integer
             tree->num = 0;
             while(*num_str)
                 tree->num = tree->num * 10 + ((*num_str++) - '0');
             tree->expr_data_type = INTEGER;
         }
-        tree->line_num=pci->in_file.cur_line_num;
-        Match(pci, ppi, ppi->next_token.type);
-
-        pci->debug_file.Out("End NewExpr");
-        return tree;
-    }
-
-    if(ppi->next_token.type==ID)
-    {
-        TreeNode* tree=new TreeNode;
-        tree->node_kind=ID_NODE;
-        AllocateAndCopy(&tree->id, ppi->next_token.str);
-        tree->line_num=pci->in_file.cur_line_num;
-        Match(pci, ppi, ppi->next_token.type);
-
-        pci->debug_file.Out("End NewExpr");
-        return tree;
-    }
-
-    if(ppi->next_token.type==LEFT_PAREN)
-    {
-        Match(pci, ppi, LEFT_PAREN);
-        TreeNode* tree=MathExpr(pci, ppi);
-        Match(pci, ppi, RIGHT_PAREN);
-
-        pci->debug_file.Out("End NewExpr");
-        return tree;
-    }
-
-    throw 0;
-    return 0;
 }
 
 // expr -> mathexpr [ (<|=) mathexpr ]
 TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
 {
-    pci->debug_file.Out("Start Expr");
-
-    TreeNode* tree=MathExpr(pci, ppi);
-
     if(ppi->next_token.type==EQUAL || ppi->next_token.type==LESS_THAN ||
         ppi->next_token.type==GREATER_THAN || ppi->next_token.type==GREATER_EQUAL ||
         ppi->next_token.type==LESS_EQUAL) // added greater than, greater equal and less equal
-    {
-        TreeNode* new_tree=new TreeNode;
-        new_tree->node_kind=OPER_NODE;
-        new_tree->oper=ppi->next_token.type;
-        new_tree->line_num=pci->in_file.cur_line_num;
-
-        new_tree->child[0]=tree;
-        Match(pci, ppi, ppi->next_token.type);
-        new_tree->child[1]=MathExpr(pci, ppi);
-
-        pci->debug_file.Out("End Expr");
-        return new_tree;
-    }
-    pci->debug_file.Out("End Expr");
-    return tree;
 }
 
 // declstmt -> type identifier := expr
@@ -382,12 +228,6 @@ TreeNode* DeclStmt(CompilerInfo* pci, ParseInfo* ppi, ExprDataType decl_type)
 // stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt | declstmt
 TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
 {
-    pci->debug_file.Out("Start Stmt");
-
-    // Compare the next token with the First() of possible statements
-    TreeNode* tree=0;
-    
-    // Check for explicit type declarations: int id := expr; real id := expr; bool id := expr;
     if(ppi->next_token.type==INT_TYPE)
     {
         Match(pci, ppi, INT_TYPE);
@@ -403,17 +243,6 @@ TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
         Match(pci, ppi, BOOL_TYPE);
         tree=DeclStmt(pci, ppi, BOOLEAN);
     }
-    else if(ppi->next_token.type==IF) tree=IfStmt(pci, ppi);
-    else if(ppi->next_token.type==REPEAT) tree=RepeatStmt(pci, ppi);
-    else if(ppi->next_token.type==ID) tree=AssignStmt(pci, ppi);
-    else if(ppi->next_token.type==READ) tree=ReadStmt(pci, ppi);
-    else if(ppi->next_token.type==WRITE) tree=WriteStmt(pci, ppi);
-    else {
-        throw 0;
-    }
-
-    pci->debug_file.Out("End Stmt");
-    return tree;
 }
 
 void PrintTree(TreeNode* node, int sh=0)
