@@ -3,178 +3,54 @@
 #include <cstring>
 #include <cmath>
 using namespace std;
+/*
+    20220195
+    20220120
+    20221072
+*/
+/*
+int x := 5;
+real y := 3.5;
+bool flag := 5 < 10;
 
-////////////////////////////////////////////////////////////////////////////////////
-// Strings /////////////////////////////////////////////////////////////////////////
+{ Test 1: Basic arithmetic operations }
+x := x + 3;
+x := x - 2;
+x := x * 4;
+x := x / 2;
+x := 2 ^ 3;
 
-bool Equals(const char* a, const char* b)
-{
-    return strcmp(a, b)==0;
-}
-
-bool StartsWith(const char* a, const char* b)
-{
-    int nb=strlen(b);
-    return strncmp(a, b, nb)==0;
-}
-
-void Copy(char* a, const char* b, int n=0)
-{
-    if(n>0) {strncpy(a, b, n); a[n]=0;}
-    else strcpy(a, b);
-}
-
-void AllocateAndCopy(char** a, const char* b)
-{
-    if(b==0) {*a=0; return;}
-    int n=strlen(b);
-    *a=new char[n+1];
-    strcpy(*a, b);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-// Input and Output ////////////////////////////////////////////////////////////////
-
-#define MAX_LINE_LENGTH 10000
-
-struct InFile
-{
-    FILE* file;
-    int cur_line_num;
-
-    char line_buf[MAX_LINE_LENGTH];
-    int cur_ind, cur_line_size;
-
-    InFile(const char* str) {file=0; if(str) file=fopen(str, "r"); cur_line_size=0; cur_ind=0; cur_line_num=0;}
-    ~InFile(){if(file) fclose(file);}
-
-    void SkipSpaces()
-    {
-        while(cur_ind<cur_line_size)
-        {
-            char ch=line_buf[cur_ind];
-            if(ch!=' ' && ch!='\t' && ch!='\r' && ch!='\n') break;
-            cur_ind++;
-        }
-    }
-
-    bool SkipUpto(const char* str)
-    {
-        while(true)
-        {
-            SkipSpaces();
-            while(cur_ind>=cur_line_size) {if(!GetNewLine()) return false; SkipSpaces();}
-
-            if(StartsWith(&line_buf[cur_ind], str))
-            {
-                cur_ind+=strlen(str);
-                return true;
-            }
-            cur_ind++;
-        }
-        return false;
-    }
-
-    bool GetNewLine()
-    {
-        cur_ind=0; line_buf[0]=0;
-        if(!fgets(line_buf, MAX_LINE_LENGTH, file)) return false;
-        cur_line_size=strlen(line_buf);
-        if(cur_line_size==0) return false; // End of file
-        cur_line_num++;
-        return true;
-    }
-
-    char* GetNextTokenStr()
-    {
-        SkipSpaces();
-        while(cur_ind>=cur_line_size) {if(!GetNewLine()) return 0; SkipSpaces();}
-        return &line_buf[cur_ind];
-    }
-
-    void Advance(int num)
-    {
-        cur_ind+=num;
-    }
-};
-
-struct OutFile
-{
-    FILE* file;
-    OutFile(const char* str) {file=0; if(str) file=fopen(str, "w");}
-    ~OutFile(){if(file) fclose(file);}
-
-    void Out(const char* s)
-    {
-        fprintf(file, "%s\n", s); fflush(file);
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////////
-// Compiler Parameters /////////////////////////////////////////////////////////////
-
-struct CompilerInfo
-{
-    InFile in_file;
-    OutFile out_file;
-    OutFile debug_file;
-
-    CompilerInfo(const char* in_str, const char* out_str, const char* debug_str)
-                : in_file(in_str), out_file(out_str), debug_file(debug_str)
-    {
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////////
-// Scanner /////////////////////////////////////////////////////////////////////////
-
-// Define maximum token length for identifiers and numbers
-#define MAX_TOKEN_LEN 40
-
-// Enumeration of all token types recognized by the scanner
-// Extended to include type keywords (INT_TYPE, REAL_TYPE, BOOL_TYPE) for type system
+{ Test 2: Real arithmetic operations }
+y := y + 2.5;
+y := y - 1.0;
+y := y * 2.0;
+y := y / 2.5;
+*/
 enum TokenType{
                 IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE,
-                ASSIGN, EQUAL, LESS_THAN, GREATER_THAN, GREATER_EQUAL, LESS_EQUAL,
+                ASSIGN, EQUAL, LESS_THAN, GREATER_THAN, GREATER_EQUAL, LESS_EQUAL, // Comparison operators
                 PLUS, MINUS, TIMES, DIVIDE, POWER,
                 SEMI_COLON,
                 LEFT_PAREN, RIGHT_PAREN,
                 LEFT_BRACE, RIGHT_BRACE,
                 ID, NUM,
-                ENDFILE, ERROR, AND_OP,  // AND_OP: & operator for logical and
+                ENDFILE, ERROR, AND_OP,  // added AND_OP for Scanner
                 INT_TYPE, REAL_TYPE, BOOL_TYPE  // Type keywords: int, real, bool
-              };
+};
 
-// String representations of token types used for debugging output
-// Helps in tracing scanner behavior and understanding token stream
-// Must be kept in sync with TokenType enum above
 const char* TokenTypeStr[]=
             {
                 "If", "Then", "Else", "End", "Repeat", "Until", "Read", "Write",
-                "Assign", "Equal", "LessThan", "GreaterThan", "GreaterEqual", "LessEqual",
+                "Assign", "Equal", "LessThan", "GreaterThan", "GreaterEqual", "LessEqual", // Comparison operators for debugging
                 "Plus", "Minus", "Times", "Divide", "Power",
                 "SemiColon",
                 "LeftParen", "RightParen",
                 "LeftBrace", "RightBrace",
                 "ID", "Num",
-                "EndFile", "Error", "And",     // Added And for debugging & operator
+                "EndFile", "Error", "And",     /// added AND_OP for Scanner
                 "IntType", "RealType", "BoolType"  // Type keywords for debugging
-            };
-
-// Note: keep this array in sync with enum TokenType
-
-struct Token
-{
-    TokenType type;
-    char str[MAX_TOKEN_LEN+1];
-
-    Token(){str[0]=0; type=ERROR;}
-    Token(TokenType _type, const char* _str) {type=_type; Copy(str, _str);}
 };
 
-// Table of reserved keywords recognized by the scanner
-// These are special tokens that cannot be used as identifiers
-// Extended to include type keywords: int, real, bool for type system
 const Token reserved_words[]=
 {
     Token(IF, "if"),
@@ -189,18 +65,13 @@ const Token reserved_words[]=
     Token(REAL_TYPE, "real"),   // Type keyword for real (double) type
     Token(BOOL_TYPE, "bool")    // Type keyword for boolean type
 };
-// Count of reserved words in the table
-const int num_reserved_words=sizeof(reserved_words)/sizeof(reserved_words[0]);
-
-// if there is tokens like < <=, sort them such that sub-tokens come last: <= <
-// the closing comment should come immediately after opening comment
 const Token symbolic_tokens[]=
 {
     Token(ASSIGN, ":="),
     Token(EQUAL, "="),
-    Token(GREATER_EQUAL, ">="),  // Must come before > to avoid conflict
-    Token(LESS_EQUAL, "<="),     // Must come before < to avoid conflict
-    Token(GREATER_THAN, ">"),
+    Token(GREATER_EQUAL, ">="),  // add >=
+    Token(LESS_EQUAL, "<="),     // add <=
+    Token(GREATER_THAN, ">"),    // add >
     Token(LESS_THAN, "<"),
     Token(PLUS, "+"),
     Token(MINUS, "-"),
@@ -214,14 +85,8 @@ const Token symbolic_tokens[]=
     Token(RIGHT_BRACE, "}"),
     Token(AND_OP,"&") // Added & as symbolic token
 };
-const int num_symbolic_tokens=sizeof(symbolic_tokens)/sizeof(symbolic_tokens[0]);
 
-inline bool IsDigit(char ch){return (ch>='0' && ch<='9');}
-inline bool IsLetter(char ch){return ((ch>='a' && ch<='z') || (ch>='A' && ch<='Z'));}
-inline bool IsLetterOrUnderscore(char ch){return (IsLetter(ch) || ch=='_');}
-
-void GetNextToken(CompilerInfo* pci, Token* ptoken)
-{
+void GetNextToken(CompilerInfo* pci, Token* ptoken){
     ptoken->type=ERROR;
     ptoken->str[0]=0;
 
@@ -253,11 +118,11 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
     }
     else if(IsDigit(s[0]))
     {
-        // Parse numeric literal - support both integers and real numbers
+        // Parse numeric variable - support both integers and real numbers
         int j=1;
         int has_decimal = 0;
         
-        // Parse digits and optional decimal point for real numbers
+        // Parse digits and optional decimal point for real numbers instead of integers only
         while(IsDigit(s[j]) || (s[j]=='.' && !has_decimal))
         {
             if(s[j]=='.') has_decimal=1;
@@ -294,7 +159,7 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
 
 // program -> stmtseq
 // stmtseq -> stmt { ; stmt }
-// stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt
+// stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt | declstmt
 // ifstmt -> if exp then stmtseq [ else stmtseq ] end
 // repeatstmt -> repeat stmtseq until expr
 // assignstmt -> identifier := expr
@@ -310,83 +175,44 @@ void GetNextToken(CompilerInfo* pci, Token* ptoken)
 enum NodeKind{
                 IF_NODE, REPEAT_NODE, ASSIGN_NODE, READ_NODE, WRITE_NODE,
                 OPER_NODE, NUM_NODE, ID_NODE, DECL_NODE  // DECL_NODE for type declarations
-             };
+};
 
-// Used for debugging only /////////////////////////////////////////////////////////
 const char* NodeKindStr[]=
             {
                 "If", "Repeat", "Assign", "Read", "Write",
-                "Oper", "Num", "ID", "Decl"  // Added Decl for declarations
+                "Oper", "Num", "ID", "Decl"  // Added Decl for for debugging 
             };
 
-// Enumeration of expression data types for the TINY language type system
-// VOID: expressions without type (used for statements)
-// INTEGER: int type - supports arithmetic operations
-// REAL: double type - supports arithmetic operations, can mix with INTEGER
-// BOOLEAN: bool type - result of comparison operators, used only in conditions
-enum ExprDataType {VOID, INTEGER, REAL, BOOLEAN};
 
-// String representations of expression data types used for debugging
-// Helps in tracing type checking and understanding type system behavior
+enum ExprDataType {VOID, INTEGER, REAL, BOOLEAN}; // added REAL type
+
+
 const char* ExprDataTypeStr[]=
-            {
-                "Void", "Integer", "Real", "Boolean"  // Added Real and Boolean types
-            };
+{
+    "Void", "Integer", "Real", "Boolean"  // Added Real type for debugging
+};
 
 #define MAX_CHILDREN 3
-
-// Tree node structure for representing the abstract syntax tree (AST)
-// Each node represents a statement or expression in the TINY program
-// Extended to support real (double) values in addition to integer values
 struct TreeNode
 {
-    TreeNode* child[MAX_CHILDREN];      // Child nodes (up to 3 children max)
-    TreeNode* sibling;                  // Sibling nodes for sequences of statements
+    TreeNode* child[MAX_CHILDREN];
+    TreeNode* sibling;
 
-    NodeKind node_kind;                 // Type of node (IF, ASSIGN, OPER, etc.)
+    NodeKind node_kind;
 
-    // Union for node-specific data
-    // oper: operator type for OPER_NODE expressions
-    // num: integer value for NUM_NODE with integer literals
-    // real_num: real (double) value for NUM_NODE with real literals
-    // id: identifier name for ID_NODE variables
-    union{TokenType oper; int num; double real_num; char* id;};
     
-    ExprDataType expr_data_type;        // Data type of expression result
+    union{TokenType oper; int num; double real_num; char* id;}; // added real_num for real values
+    
+    ExprDataType expr_data_type;        // Data type of RHS expression result -> already exists
     ExprDataType var_type;              // Variable type (only for ID_NODE): INTEGER, REAL, or BOOLEAN
 
-    int line_num;                       // Source line number for error reporting
+    int line_num;                       
 
-    // Default constructor: initialize all fields
-    TreeNode() {
-        int i;
-        for(i=0;i<MAX_CHILDREN;i++) child[i]=0;
-        sibling=0;
-        expr_data_type=VOID;
-        var_type=VOID;          // Add var_type initialization
-        real_num=0.0;           // Initialize real_num to 0.0
-    }
+    
+        TreeNode() {int i; for(i=0;i<MAX_CHILDREN;i++) child[i]=0; sibling=0; expr_data_type=VOID;var_type=VOID;real_num=0.0;}
+
 };
 
-struct ParseInfo
-{
-    Token next_token;
-};
-
-void Match(CompilerInfo* pci, ParseInfo* ppi, TokenType expected_token_type)
-{
-    pci->debug_file.Out("Start Match");
-    if(ppi->next_token.type!=expected_token_type) {
-        throw 0;
-    }
-    GetNextToken(pci, &ppi->next_token);
-
-    fprintf(pci->debug_file.file, "[%d] %s (%s)\n", pci->in_file.cur_line_num, ppi->next_token.str, TokenTypeStr[ppi->next_token.type]); fflush(pci->debug_file.file);
-}
-
-TreeNode* MathExpr(CompilerInfo*, ParseInfo*);
-
-// newexpr -> ( mathexpr ) | number | identifier
 TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
 {
     pci->debug_file.Out("Start NewExpr");
@@ -418,7 +244,8 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
         tree->node_kind=NUM_NODE;
         char* num_str=ppi->next_token.str;
         
-        // Check if this is a real number (contains decimal point) or integer
+        // remove the loop parsing as integer only
+        // check if the number contains a decimal point
         int has_decimal = 0;
         char* temp_str = num_str;
         while(*temp_str)
@@ -429,7 +256,6 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
         
         if(has_decimal)
         {
-            // Parse as real number (double)
             tree->real_num = 0.0;
             double multiplier = 1.0;
             int before_decimal = 1;
@@ -457,13 +283,12 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
         }
         else
         {
-            // Parse as integer
+            // Parse as integer -> already exists
             tree->num = 0;
             while(*num_str)
                 tree->num = tree->num * 10 + ((*num_str++) - '0');
             tree->expr_data_type = INTEGER;
         }
-        
         tree->line_num=pci->in_file.cur_line_num;
         Match(pci, ppi, ppi->next_token.type);
 
@@ -497,102 +322,6 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
     return 0;
 }
 
-// factor -> newexpr { ^ newexpr }    right associative
-TreeNode* Factor(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start Factor");
-
-    TreeNode* tree=NewExpr(pci, ppi);
-
-    if(ppi->next_token.type==POWER)
-    {
-        TreeNode* new_tree=new TreeNode;
-        new_tree->node_kind=OPER_NODE;
-        new_tree->oper=ppi->next_token.type;
-        new_tree->line_num=pci->in_file.cur_line_num;
-
-        new_tree->child[0]=tree;
-        Match(pci, ppi, ppi->next_token.type);
-        new_tree->child[1]=Factor(pci, ppi);
-
-        pci->debug_file.Out("End Factor");
-        return new_tree;
-    }
-    pci->debug_file.Out("End Factor");
-    return tree;
-}
-
-// andexpr -> factor { & factor }    left associative
-TreeNode* AndExpr(CompilerInfo* pci, ParseInfo* ppi)
-{
-    TreeNode* tree = Factor(pci, ppi);
-
-    while (ppi->next_token.type == AND_OP)
-    {
-        TreeNode* new_tree = new TreeNode;
-        new_tree->node_kind = OPER_NODE;
-        new_tree->oper = ppi->next_token.type;
-        new_tree->line_num = pci->in_file.cur_line_num;
-
-        new_tree->child[0] = tree;
-        Match(pci, ppi, AND_OP);
-        new_tree->child[1] = AndExpr(pci, ppi);
-
-        tree = new_tree;
-    }
-    return tree;
-}
-
-// old rule:
-// term -> factor { (*|/) factor }    left associative
-// new rule:
-// term -> AndExpr { (*|/) AndExpr }
-TreeNode* Term(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start Term");
-    TreeNode* tree=AndExpr(pci, ppi);
-
-    while(ppi->next_token.type==TIMES || ppi->next_token.type==DIVIDE)
-    {
-        TreeNode* new_tree=new TreeNode;
-        new_tree->node_kind=OPER_NODE;
-        new_tree->oper=ppi->next_token.type;
-        new_tree->line_num=pci->in_file.cur_line_num;
-
-        new_tree->child[0]=tree;
-        Match(pci, ppi, ppi->next_token.type);
-        new_tree->child[1]=AndExpr(pci, ppi);
-
-        tree=new_tree;
-    }
-    pci->debug_file.Out("End Term");
-    return tree;
-}
-
-// mathexpr -> term { (+|-) term }    left associative
-TreeNode* MathExpr(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start MathExpr");
-
-    TreeNode* tree=Term(pci, ppi);
-
-    while(ppi->next_token.type==PLUS || ppi->next_token.type==MINUS)
-    {
-        TreeNode* new_tree=new TreeNode;
-        new_tree->node_kind=OPER_NODE;
-        new_tree->oper=ppi->next_token.type;
-        new_tree->line_num=pci->in_file.cur_line_num;
-
-        new_tree->child[0]=tree;
-        Match(pci, ppi, ppi->next_token.type);
-        new_tree->child[1]=Term(pci, ppi);
-
-        tree=new_tree;
-    }
-    pci->debug_file.Out("End MathExpr");
-    return tree;
-}
-
 // expr -> mathexpr [ (<|=) mathexpr ]
 TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
 {
@@ -601,8 +330,8 @@ TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
     TreeNode* tree=MathExpr(pci, ppi);
 
     if(ppi->next_token.type==EQUAL || ppi->next_token.type==LESS_THAN ||
-       ppi->next_token.type==GREATER_THAN || ppi->next_token.type==GREATER_EQUAL ||
-       ppi->next_token.type==LESS_EQUAL)
+        ppi->next_token.type==GREATER_THAN || ppi->next_token.type==GREATER_EQUAL ||
+        ppi->next_token.type==LESS_EQUAL) // added greater than, greater equal and less equal
     {
         TreeNode* new_tree=new TreeNode;
         new_tree->node_kind=OPER_NODE;
@@ -620,95 +349,9 @@ TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
     return tree;
 }
 
-// writestmt -> write expr
-TreeNode* WriteStmt(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start WriteStmt");
-
-    TreeNode* tree=new TreeNode;
-    tree->node_kind=WRITE_NODE;
-    tree->line_num=pci->in_file.cur_line_num;
-
-    Match(pci, ppi, WRITE);
-    tree->child[0]=Expr(pci, ppi);
-
-    pci->debug_file.Out("End WriteStmt");
-    return tree;
-}
-
-// readstmt -> read identifier
-TreeNode* ReadStmt(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start ReadStmt");
-
-    TreeNode* tree=new TreeNode;
-    tree->node_kind=READ_NODE;
-    tree->line_num=pci->in_file.cur_line_num;
-
-    Match(pci, ppi, READ);
-    if(ppi->next_token.type==ID) AllocateAndCopy(&tree->id, ppi->next_token.str);
-    Match(pci, ppi, ID);
-
-    pci->debug_file.Out("End ReadStmt");
-    return tree;
-}
-
-// assignstmt -> identifier := expr
-TreeNode* AssignStmt(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start AssignStmt");
-
-    TreeNode* tree=new TreeNode;
-    tree->node_kind=ASSIGN_NODE;
-    tree->line_num=pci->in_file.cur_line_num;
-
-    if(ppi->next_token.type==ID) AllocateAndCopy(&tree->id, ppi->next_token.str);
-    Match(pci, ppi, ID);
-    Match(pci, ppi, ASSIGN); tree->child[0]=Expr(pci, ppi);
-
-    pci->debug_file.Out("End AssignStmt");
-    return tree;
-}
-
-TreeNode* StmtSeq(CompilerInfo*, ParseInfo*);
-
-// repeatstmt -> repeat stmtseq until expr
-TreeNode* RepeatStmt(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start RepeatStmt");
-
-    TreeNode* tree=new TreeNode;
-    tree->node_kind=REPEAT_NODE;
-    tree->line_num=pci->in_file.cur_line_num;
-
-    Match(pci, ppi, REPEAT); tree->child[0]=StmtSeq(pci, ppi);
-    Match(pci, ppi, UNTIL); tree->child[1]=Expr(pci, ppi);
-
-    pci->debug_file.Out("End RepeatStmt");
-    return tree;
-}
-
-// ifstmt -> if exp then stmtseq [ else stmtseq ] end
-TreeNode* IfStmt(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start IfStmt");
-
-    TreeNode* tree=new TreeNode;
-    tree->node_kind=IF_NODE;
-    tree->line_num=pci->in_file.cur_line_num;
-
-    Match(pci, ppi, IF); tree->child[0]=Expr(pci, ppi);
-    Match(pci, ppi, THEN); tree->child[1]=StmtSeq(pci, ppi);
-    if(ppi->next_token.type==ELSE) {Match(pci, ppi, ELSE); tree->child[2]=StmtSeq(pci, ppi);}
-    Match(pci, ppi, END);
-
-    pci->debug_file.Out("End IfStmt");
-    return tree;
-}
-
 // declstmt -> type identifier := expr
 // Explicit type declaration with initialization
-// Examples: int x := 5; real y; bool flag := true;
+// Examples: int x := 5; real y; bool flag;
 TreeNode* DeclStmt(CompilerInfo* pci, ParseInfo* ppi, ExprDataType decl_type)
 {
     pci->debug_file.Out("Start DeclStmt");
@@ -773,49 +416,6 @@ TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
     return tree;
 }
 
-// stmtseq -> stmt { ; stmt }
-TreeNode* StmtSeq(CompilerInfo* pci, ParseInfo* ppi)
-{
-    pci->debug_file.Out("Start StmtSeq");
-
-    TreeNode* first_tree=Stmt(pci, ppi);
-    TreeNode* last_tree=first_tree;
-
-    // If we did not reach one of the Follow() of StmtSeq(), we are not done yet
-    while(ppi->next_token.type!=ENDFILE && ppi->next_token.type!=END &&
-          ppi->next_token.type!=ELSE && ppi->next_token.type!=UNTIL)
-    {
-        Match(pci, ppi, SEMI_COLON);
-        // after consuming a semicolon, if the next token is in the Follow() of StmtSeq,
-        // then we had a trailing semicolon — don't try to parse another statement
-        if(ppi->next_token.type==ENDFILE || ppi->next_token.type==END ||
-           ppi->next_token.type==ELSE || ppi->next_token.type==UNTIL)
-        {
-            break;
-        }
-        TreeNode* next_tree=Stmt(pci, ppi);
-        last_tree->sibling=next_tree;
-        last_tree=next_tree;
-    }
-
-    pci->debug_file.Out("End StmtSeq");
-    return first_tree;
-}
-
-// program -> stmtseq
-TreeNode* Parse(CompilerInfo* pci)
-{
-    ParseInfo parse_info;
-    GetNextToken(pci, &parse_info.next_token);
-
-    TreeNode* syntax_tree=StmtSeq(pci, &parse_info);
-
-    if(parse_info.next_token.type!=ENDFILE)
-        pci->debug_file.Out("Error code ends before file ends");
-
-    return syntax_tree;
-}
-
 void PrintTree(TreeNode* node, int sh=0)
 {
     int i, NSH=3;
@@ -850,7 +450,7 @@ void DestroyTree(TreeNode* node)
 {
     int i;
 
-    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind==DECL_NODE)
+    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind==DECL_NODE) // add declnode
         if(node->id) delete[] node->id;
 
     for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) DestroyTree(node->child[i]);
@@ -859,165 +459,66 @@ void DestroyTree(TreeNode* node)
     delete node;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// Analyzer ////////////////////////////////////////////////////////////////////////
-
-const int SYMBOL_HASH_SIZE=10007;
-
-struct LineLocation
-{
-    int line_num;
-    LineLocation* next;
-};
-
-// Structure representing a variable in the symbol table
-// Extended with type information to support the type system
 struct VariableInfo
 {
-    char* name;                             // Variable name/identifier
-    int memloc;                             // Memory location index for runtime storage
-    ExprDataType var_type;                  // Type of this variable: INTEGER, REAL, or BOOLEAN
-    LineLocation* head_line;                // Head of linked list of source line locations
-    LineLocation* tail_line;                // Tail of linked list of source line locations
-    VariableInfo* next_var;                 // Next variable in hash bucket chain
+    char* name;
+    int memloc;
+    ExprDataType var_type; // Variable type: INTEGER, REAL, or BOOLEAN (only for ID_NODE)
+    LineLocation* head_line;
+    LineLocation* tail_line;
+    VariableInfo* next_var;
 };
 
-struct SymbolTable
+// Insert function in SymbolTable
+void Insert(const char* name, int line_num, ExprDataType type)// add type parameter
 {
-    int num_vars;
-    VariableInfo* var_info[SYMBOL_HASH_SIZE];
+    LineLocation* lineloc=new LineLocation;
+    lineloc->line_num=line_num;
+    lineloc->next=0;
 
-    SymbolTable() {num_vars=0; int i; for(i=0;i<SYMBOL_HASH_SIZE;i++) var_info[i]=0;}
+    int h=Hash(name);
+    VariableInfo* prev=0;
+    VariableInfo* cur=var_info[h];
 
-    int Hash(const char* name)
+    while(cur)
     {
-        int i, len=strlen(name);
-        int hash_val=11;
-        for(i=0;i<len;i++) hash_val=(hash_val*17+(int)name[i])%SYMBOL_HASH_SIZE;
-        return hash_val;
-    }
-
-    VariableInfo* Find(const char* name)
-    {
-        int h=Hash(name);
-        VariableInfo* cur=var_info[h];
-        while(cur)
+        if(Equals(name, cur->name))
         {
-            if(Equals(name, cur->name)) return cur;
-            cur=cur->next_var;
-        }
-        return 0;
-    }
-
-    void Insert(const char* name, int line_num, ExprDataType type)
-    {
-        // Create a new line location entry with the source line number
-        LineLocation* lineloc=new LineLocation;
-        lineloc->line_num=line_num;
-        lineloc->next=0;
-
-        // Calculate hash index for this variable name
-        int h=Hash(name);
-        VariableInfo* prev=0;
-        VariableInfo* cur=var_info[h];
-
-        // Check if variable already exists in the symbol table
-        while(cur)
-        {
-            if(Equals(name, cur->name))
-            {
                 // Variable already exists - check type consistency
                 if(cur->var_type != type)
                 {
                     // Type mismatch: variable already declared with different type
                     printf("ERROR Type mismatch: variable '%s' already declared with type '%s', attempted redeclaration with type '%s'\n", 
                            name, ExprDataTypeStr[cur->var_type], ExprDataTypeStr[type]);
-                    throw 0;  // Throw exception for type conflict
+                    throw 0;
                 }
-                // Add this line location to the list of line locations
-                cur->tail_line->next=lineloc;
-                cur->tail_line=lineloc;
-                return;
-            }
-            prev=cur;
-            cur=cur->next_var;
+            cur->tail_line->next=lineloc;
+            cur->tail_line=lineloc;
+            return;
         }
-
-        // Create new variable entry with type information
-        VariableInfo* vi=new VariableInfo;
-        vi->head_line=vi->tail_line=lineloc;
-        vi->next_var=0;
-        vi->memloc=num_vars++;
-        vi->var_type=type;                      // Store the variable's data type
-        AllocateAndCopy(&vi->name, name);
-
-        // Insert into hash table
-        if(!prev) var_info[h]=vi;
-        else prev->next_var=vi;
+        prev=cur;
+        cur=cur->next_var;
     }
 
-    void Print()
-    {
-        int i;
-        for(i=0;i<SYMBOL_HASH_SIZE;i++)
-        {
-            VariableInfo* curv=var_info[i];
-            while(curv)
-            {
-                printf("[Var=%s][Mem=%d]", curv->name, curv->memloc);
-                LineLocation* curl=curv->head_line;
-                while(curl)
-                {
-                    printf("[Line=%d]", curl->line_num);
-                    curl=curl->next;
-                }
-                printf("\n");
-                curv=curv->next_var;
-            }
-        }
-    }
+    VariableInfo* vi=new VariableInfo;
+    vi->head_line=vi->tail_line=lineloc;
+    vi->next_var=0;
+    vi->memloc=num_vars++;
+    vi->var_type=type; // Store the variable's data type
 
-    void Destroy()
-    {
-        int i;
-        for(i=0;i<SYMBOL_HASH_SIZE;i++)
-        {
-            VariableInfo* curv=var_info[i];
-            while(curv)
-            {
-                LineLocation* curl=curv->head_line;
-                while(curl)
-                {
-                    LineLocation* pl=curl;
-                    curl=curl->next;
-                    delete pl;
-                }
-                VariableInfo* p=curv;
-                curv=curv->next_var;
-                delete p;
-            }
-            var_info[i]=0;
-        }
-    }
-};
+    AllocateAndCopy(&vi->name, name);
 
-// Enhanced semantic analysis with full type checking for the type system
-// Two-pass approach:
-// 1. First pass: analyze children recursively
-// 2. Second pass: determine and validate types based on context
+    if(!prev) var_info[h]=vi;
+    else prev->next_var=vi;
+}
+
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
     int i;
 
-    // PASS 1: Recursively analyze all child nodes first
-    // This ensures that expressions are fully analyzed before we check the parent node
-    for(i=0;i<MAX_CHILDREN;i++) 
-        if(node->child[i]) 
-            Analyze(node->child[i], symbol_table);
+    for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);
 
-    // PASS 2: Determine and validate types after children are analyzed
-    
-    // Handle explicit type declarations: int x := expr; real y := expr; bool z := expr;
+    // add handling for explicit type declarations
     if(node->node_kind==DECL_NODE)
     {
         // Declared type is stored in node->var_type
@@ -1046,16 +547,15 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
             symbol_table->Insert(node->id, node->line_num, decl_type);
         }
     }
-    
-    // Determine expression type based on operator and operands
+    // modify this condition to avoid boolean type comparisons with < or =
     if(node->node_kind==OPER_NODE)
     {
         ExprDataType left_type = node->child[0]->expr_data_type;
         ExprDataType right_type = node->child[1]->expr_data_type;
         
-        // Comparison operators (< = > >= <=) return BOOLEAN type
+        // Comparison operators (<, =, <=, >, >=) return BOOLEAN type
         if(node->oper==EQUAL || node->oper==LESS_THAN || node->oper==GREATER_THAN ||
-           node->oper==GREATER_EQUAL || node->oper==LESS_EQUAL)
+            node->oper==GREATER_EQUAL || node->oper==LESS_EQUAL)
         {
             node->expr_data_type=BOOLEAN;
             
@@ -1071,7 +571,7 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
                 throw 0;
             }
         }
-        // Arithmetic operators: + - * / ^ &
+        // Arithmetic operators: + - * / ^
         else
         {
             // Check that neither operand is BOOLEAN
@@ -1096,12 +596,9 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
             }
         }
     }
-    // Set type for NUM_NODE (numeric literal)
+    // Set type for NUM_NODE (integer or real value)
     else if(node->node_kind==NUM_NODE)
     {
-        // Type was already set during parsing:
-        // REAL if has decimal point, INTEGER otherwise
-        // Don't override it here
         if(node->expr_data_type == VOID)
             node->expr_data_type = INTEGER;  // Fallback only if not set
     }
@@ -1123,15 +620,13 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
             if(var->var_type != VOID)
                 node->expr_data_type = var->var_type;
             else
-                node->expr_data_type = INTEGER;  // Default fallback
+                node->expr_data_type = INTEGER;  // Default integer value
             node->var_type = var->var_type;
         }
     }
 
-    // Handle ASSIGN_NODE: variable := expression
     if(node->node_kind==ASSIGN_NODE)
     {
-        // Now we know the RHS expression type from analysis above
         ExprDataType rhs_type = node->child[0]->expr_data_type;
         VariableInfo* var = symbol_table->Find(node->id);
         
@@ -1152,10 +647,10 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         {
             // Type mismatch: variable type != RHS expression type
             printf("ERROR Line %d: Assignment type mismatch: cannot assign %s to %s variable '%s'\n",
-                   node->line_num,
-                   ExprDataTypeStr[rhs_type],
-                   ExprDataTypeStr[var->var_type],
-                   node->id);
+                    node->line_num,
+                    ExprDataTypeStr[rhs_type],
+                    ExprDataTypeStr[var->var_type],
+                    node->id);
             throw 0;
         }
         else
@@ -1202,45 +697,24 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         Analyze(node->sibling, symbol_table);
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// Code Generator //////////////////////////////////////////////////////////////////
 
-// Structure to represent a typed value during evaluation
-// Holds either an integer, real, or boolean value with its type
 struct TypedValue
 {
     ExprDataType type;      // Type of the value: INTEGER, REAL, or BOOLEAN
-    int int_val;            // Integer value
-    double real_val;        // Real (double) value
-    int bool_val;           // Boolean value (0=false, 1=true)
+    int int_val;
+    double real_val;
+    int bool_val; 
     
-    // Default constructor
     TypedValue() : type(VOID), int_val(0), real_val(0.0), bool_val(0) {}
     
-    // Constructor for INTEGER
     TypedValue(int val) : type(INTEGER), int_val(val), real_val((double)val), bool_val(0) {}
     
-    // Constructor for REAL
     TypedValue(double val) : type(REAL), int_val(0), real_val(val), bool_val(0) {}
     
-    // Constructor for BOOLEAN
     TypedValue(int val, bool) : type(BOOLEAN), int_val(val), real_val(0.0), bool_val(val) {}
 };
 
-// Helper function to raise an integer to a power
-// Used for the power operator (^)
-// Parameters: base (a) and exponent (b)
-// Returns: a raised to the power b
-int Power(int a, int b)
-{
-    // Special cases for power operation
-    if(a==0) return 0;           // 0^n = 0
-    if(b==0) return 1;           // n^0 = 1
-    if(b>=1) return a*Power(a, b-1);  // Recursive calculation
-    return 0;
-}
-
-// Helper function for real power (using double)
+// Power function for real numbers
 double RealPower(double a, int b)
 {
     if(a==0.0) return 0.0;
@@ -1255,9 +729,7 @@ double RealPower(double a, int b)
     return 0.0;
 }
 
-// Enhanced evaluate function that handles all three types: int, real, and boolean
-// Returns a TypedValue containing the result of evaluating the expression
-// Supports type mixing with automatic conversion where appropriate
+
 TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* variables)
 {
     TypedValue result;
@@ -1542,33 +1014,13 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, TypedValue* variables
     if(node->node_kind==DECL_NODE)
     {
         // Evaluate the initializing expression
-        TypedValue v;
-        VariableInfo* var = symbol_table->Find(node->id);
-        if(node->child[0])
-        {
-            v = Evaluate(node->child[0], symbol_table, variables);
-        }
-        else
-        {
-            // No initializer: set default based on declared type
-            if(var)
-            {
-                if(var->var_type == REAL) v = TypedValue(0.0);
-                else if(var->var_type == BOOLEAN) v = TypedValue(0, true);
-                else v = TypedValue(0);
-            }
-            else
-            {
-                v = TypedValue(0);
-            }
-        }
-
+        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
+        
         // Store the result in the variable
+        VariableInfo* var = symbol_table->Find(node->id);
         if(var)
         {
             variables[var->memloc] = v;
-            // ensure stored value has correct type
-            variables[var->memloc].type = var->var_type;
         }
     }
     
@@ -1685,59 +1137,3 @@ void RunProgram(TreeNode* syntax_tree, SymbolTable* symbol_table)
     delete[] variables;
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-// Scanner and Compiler ////////////////////////////////////////////////////////////
-
-void StartCompiler(CompilerInfo* pci)
-{
-    TreeNode* syntax_tree=Parse(pci);
-
-    SymbolTable symbol_table;
-    Analyze(syntax_tree, &symbol_table);
-
-    printf("Symbol Table:\n");
-    symbol_table.Print();
-    printf("---------------------------------\n"); fflush(NULL);
-
-    printf("Syntax Tree:\n");
-    PrintTree(syntax_tree);
-    printf("---------------------------------\n"); fflush(NULL);
-
-    printf("Run Program:\n");
-    RunProgram(syntax_tree, &symbol_table);
-    printf("---------------------------------\n"); fflush(NULL);
-
-    symbol_table.Destroy();
-    DestroyTree(syntax_tree);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-// Scanner only ////////////////////////////////////////////////////////////////////
-
-void StartScanner(CompilerInfo* pci)
-{
-    Token token;
-
-    while(true)
-    {
-        GetNextToken(pci, &token);
-        printf("[%d] %s (%s)\n", pci->in_file.cur_line_num, token.str, TokenTypeStr[token.type]); fflush(NULL);
-        if(token.type==ENDFILE || token.type==ERROR) break;
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
-int main()
-{
-    printf("Start main()\n"); fflush(NULL);
-
-    CompilerInfo compiler_info("input.txt", "output.txt", "debug.txt");
-
-    StartCompiler(&compiler_info);
-
-    printf("End main()\n"); fflush(NULL);
-    return 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////////
