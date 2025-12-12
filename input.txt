@@ -2,34 +2,51 @@ int x := 5;
 real y := 3.5;
 bool flag := 5 < 10;
 
+{ Test 1: Basic arithmetic operations }
 x := x + 3;
 x := x - 2;
 x := x * 4;
 x := x / 2;
 x := 2 ^ 3;
 
+{ Test 2: Real arithmetic operations }
 y := y + 2.5;
 y := y - 1.0;
 y := y * 2.0;
 y := y / 2.5;
 
+{ Test 3: Mixed type arithmetic (int to real conversion) }
 y := 5 + 3.5;
 y := 10 * 2.0;
 
+{ Test 4: Comparison operators returning boolean }
 flag := 5 < 10;
 flag := 10 = 10;
+flag := 3 > 5;
+flag := 4 >= 4;
+flag := 2 <= 3;
 
+{ Test 5: Real comparisons }
 flag := 3.5 < 4.0;
 flag := 2.5 = 2.5;
+flag := 4.0 > 3.5;
+flag := 3.0 >= 3.0;
+flag := 2.5 <= 3.0;
 
+{ Test 6: Conditional with boolean }
 if flag then
   x := 100
 end;
 
+{ Test 7: Repeat loop }
 repeat
   x := x + 1
 until x = 110;
 
+{ Test 8: Write results }
 write x + 5;
 write y * 2.0;
-write 10 < 5
+write 10 < 5;
+write 5 > 3;
+write 4 >= 4;
+write 2 <= 3;
