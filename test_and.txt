@@ -1,0 +1,6 @@
+program test;
+var a : boolean;
+begin
+  a := true & false;
+  write a;
+end.

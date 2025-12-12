@@ -4,177 +4,6 @@
 #include <cmath>
 using namespace std;
 
-/*
-================================================================================
-  ENHANCED TINY LANGUAGE CODE GENERATOR - WITH TYPE SYSTEM
-================================================================================
-  
-  Author: Enhanced with type support (int, real, bool)
-  Date: 2025
-  
-  SUPPORTED DATA TYPES:
-  - int: Integer values (mapped to C++ int)
-  - real: Real/floating-point values (mapped to C++ double)
-  - bool: Boolean values (true/false, used in conditions only)
-  
-  VARIABLE DECLARATION RULES:
-  - ALL variables MUST be declared at the beginning of the program
-  - Format: int x; real y; bool flag;
-  - Type is mandatory for each variable
-  
-  TYPE USAGE RULES:
-  - bool variables: CAN be used in if and repeat conditions ONLY
-  - int and real variables: CANNOT be used directly in if/repeat conditions
-  - NO arithmetic operations on bool variables
-  - Arithmetic operations allowed on int and real variables
-  - int and real CAN be mixed in expressions (auto-convert int to real)
-  
-  ASSIGNMENT RULES:
-  - Variables of different types CANNOT be assigned to each other
-  - Example: int x = 5; real y = x; produces COMPILER ERROR
-  - Type checking is strict and enforced at compile time
-  
-  ERROR HANDLING:
-  - Exceptions thrown for illegal type operations
-  - Meaningful error messages for type mismatches
-  - All type violations caught before execution
-  
-  OPERATIONS SUPPORTED:
-  - Math: + - * / ^ (power)
-  - Comparison: < = (returns bool)
-  - Logical: & (and operator, for booleans)
-  - I/O: read, write
-
-================================================================================
-  TEST PROGRAM (20+ TEST CASES)
-================================================================================
-
-TEST PROGRAM IN TINY LANGUAGE:
-
-  // TEST CASE 1: Variable declarations of all types
-  int x;
-  real y;
-  bool flag;
-  
-  // TEST CASE 2: Integer arithmetic operations
-  x := 5;
-  x := x + 3;
-  x := x - 2;
-  x := x * 4;
-  x := x / 2;
-  x := 2 ^ 3;
-  
-  // TEST CASE 3: Real arithmetic operations
-  y := 3.5;
-  y := y + 2.5;
-  y := y - 1.0;
-  y := y * 2.0;
-  y := y / 2.5;
-  
-  // TEST CASE 4: Integer to real conversion in mixed expressions
-  y := 5 + 3.5;      // 5 (int) converted to real, result is 8.5
-  y := 10 * 2.0;     // 10 (int) converted to real, result is 20.0
-  
-  // TEST CASE 5: Boolean from comparison (integer comparison)
-  flag := 5 < 10;    // TRUE
-  flag := 10 = 10;   // TRUE
-  flag := 3 > 5;     // FALSE (result of 5<3)
-  
-  // TEST CASE 6: Boolean from comparison (real comparison)
-  flag := 3.5 < 4.0; // TRUE
-  flag := 2.5 = 2.5; // TRUE
-  
-  // TEST CASE 7: Conditional with boolean variable
-  if flag then
-    x := 100
-  end;
-  
-  // TEST CASE 8: Repeat with boolean condition
-  repeat
-    x := x + 1
-  until x = 50;
-  
-  // TEST CASE 9: Invalid - int in condition (should error)
-  // if x then ... end;  // COMPILER ERROR: int cannot be used in condition
-  
-  // TEST CASE 10: Invalid - real in condition (should error)
-  // if y then ... end;  // COMPILER ERROR: real cannot be used in condition
-  
-  // TEST CASE 11: Invalid - bool arithmetic (should error)
-  // flag := flag + 1;   // COMPILER ERROR: cannot do arithmetic on bool
-  
-  // TEST CASE 12: Invalid - type mismatch assignment (should error)
-  // x := y;             // COMPILER ERROR: cannot assign real to int
-  // y := x;             // COMPILER ERROR: cannot assign int to real
-  
-  // TEST CASE 13: Read integer
-  read x;
-  
-  // TEST CASE 14: Read real
-  read y;
-  
-  // TEST CASE 15: Write integer result
-  write x + 5;
-  
-  // TEST CASE 16: Write real result
-  write y * 2.0;
-  
-  // TEST CASE 17: Write boolean result
-  write 5 < 10;
-  
-  // TEST CASE 18: Nested expressions with proper type conversion
-  y := 5 + 3.5 * 2.0;
-  
-  // TEST CASE 19: Power operation with integers
-  x := 2 ^ 8;  // Result: 256
-  
-  // TEST CASE 20: Complex boolean logic with & operator
-  flag := 5 < 10 & 3 = 3;  // TRUE AND TRUE = TRUE
-  
-  // TEST CASE 21: Type checking prevents unintended conversions
-  // x := 5.5;  // COMPILER ERROR: cannot assign real to int
-  
-  // TEST CASE 22: Comparison operators work for both int and real
-  flag := 100 < 200;   // int comparison
-  flag := 1.5 < 2.5;   // real comparison
-  flag := 10 = 10;     // int comparison
-  
-  // TEST CASE 23: Assignment with correct type
-  x := 42;    // OK: int to int
-  y := 3.14;  // OK: real to real
-  flag := 5 < 10;  // OK: bool result to bool
-  
-  // TEST CASE 24: Unary minus operation
-  x := -5;    // OK: unary minus on int
-  y := -3.14; // OK: unary minus on real
-
-END OF TEST PROGRAM
-
-================================================================================
-  IMPLEMENTATION NOTES
-================================================================================
-
-Key modifications from original TINY:
-1. Extended enum ExprDataType to include REAL and BOOL types
-2. Modified VariableInfo structure to store type information
-3. Updated Evaluate() to handle real arithmetic with double values
-4. Enhanced type checking in Analyze() to enforce strict type rules
-5. Modified RunProgram() to support real variables and proper I/O
-6. All variables now require explicit type declarations
-7. Type conversions only allowed where semantically correct
-8. Exception throwing for all illegal type operations
-
-================================================================================
-*/
-
-// sequence of statements separated by ;
-// ALL variables MUST be declared at the beginning with type: int, real, or bool
-// if-statement: if (boolean_condition) then [else] end
-// repeat-statement: repeat until (boolean_condition)
-// boolean expressions used only in if and repeat conditions (result of < or =)
-// int and real can be mixed in arithmetic expressions with auto-conversion
-// Comments {}
-
 ////////////////////////////////////////////////////////////////////////////////////
 // Strings /////////////////////////////////////////////////////////////////////////
 
@@ -306,7 +135,7 @@ struct CompilerInfo
 // Extended to include type keywords (INT_TYPE, REAL_TYPE, BOOL_TYPE) for type system
 enum TokenType{
                 IF, THEN, ELSE, END, REPEAT, UNTIL, READ, WRITE,
-                ASSIGN, EQUAL, LESS_THAN,
+                ASSIGN, EQUAL, LESS_THAN, GREATER_THAN, GREATER_EQUAL, LESS_EQUAL,
                 PLUS, MINUS, TIMES, DIVIDE, POWER,
                 SEMI_COLON,
                 LEFT_PAREN, RIGHT_PAREN,
@@ -322,7 +151,7 @@ enum TokenType{
 const char* TokenTypeStr[]=
             {
                 "If", "Then", "Else", "End", "Repeat", "Until", "Read", "Write",
-                "Assign", "Equal", "LessThan",
+                "Assign", "Equal", "LessThan", "GreaterThan", "GreaterEqual", "LessEqual",
                 "Plus", "Minus", "Times", "Divide", "Power",
                 "SemiColon",
                 "LeftParen", "RightParen",
@@ -369,6 +198,9 @@ const Token symbolic_tokens[]=
 {
     Token(ASSIGN, ":="),
     Token(EQUAL, "="),
+    Token(GREATER_EQUAL, ">="),  // Must come before > to avoid conflict
+    Token(LESS_EQUAL, "<="),     // Must come before < to avoid conflict
+    Token(GREATER_THAN, ">"),
     Token(LESS_THAN, "<"),
     Token(PLUS, "+"),
     Token(MINUS, "-"),
@@ -704,7 +536,7 @@ TreeNode* AndExpr(CompilerInfo* pci, ParseInfo* ppi)
 
         new_tree->child[0] = tree;
         Match(pci, ppi, AND_OP);
-        new_tree->child[1] = Factor(pci, ppi);
+        new_tree->child[1] = AndExpr(pci, ppi);
 
         tree = new_tree;
     }
@@ -768,7 +600,9 @@ TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
 
     TreeNode* tree=MathExpr(pci, ppi);
 
-    if(ppi->next_token.type==EQUAL || ppi->next_token.type==LESS_THAN)
+    if(ppi->next_token.type==EQUAL || ppi->next_token.type==LESS_THAN ||
+       ppi->next_token.type==GREATER_THAN || ppi->next_token.type==GREATER_EQUAL ||
+       ppi->next_token.type==LESS_EQUAL)
     {
         TreeNode* new_tree=new TreeNode;
         new_tree->node_kind=OPER_NODE;
@@ -1209,15 +1043,16 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         ExprDataType left_type = node->child[0]->expr_data_type;
         ExprDataType right_type = node->child[1]->expr_data_type;
         
-        // Comparison operators (< =) return BOOLEAN type
-        if(node->oper==EQUAL || node->oper==LESS_THAN)
+        // Comparison operators (< = > >= <=) return BOOLEAN type
+        if(node->oper==EQUAL || node->oper==LESS_THAN || node->oper==GREATER_THAN ||
+           node->oper==GREATER_EQUAL || node->oper==LESS_EQUAL)
         {
             node->expr_data_type=BOOLEAN;
             
             // Type checking for comparisons
             if((left_type == BOOLEAN || right_type == BOOLEAN))
             {
-                printf("ERROR Line %d: Cannot compare BOOLEAN values with < or =\n", node->line_num);
+                printf("ERROR Line %d: Cannot compare BOOLEAN values with comparison operators\n", node->line_num);
                 throw 0;
             }
             if((left_type == VOID || right_type == VOID))
@@ -1226,18 +1061,7 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
                 throw 0;
             }
         }
-        // Logical AND operator works on BOOLEAN operands
-        else if(node->oper==AND_OP)
-        {
-            if(left_type != BOOLEAN || right_type != BOOLEAN)
-            {
-                printf("ERROR Line %d: AND operator (&) requires BOOLEAN operands, got %s and %s\n", 
-                       node->line_num, ExprDataTypeStr[left_type], ExprDataTypeStr[right_type]);
-                throw 0;
-            }
-            node->expr_data_type = BOOLEAN;
-        }
-        // Arithmetic operators: + - * / ^
+        // Arithmetic operators: + - * / ^ &
         else
         {
             // Check that neither operand is BOOLEAN
@@ -1463,7 +1287,7 @@ TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* varia
     TypedValue a = Evaluate(node->child[0], symbol_table, variables);
     TypedValue b = Evaluate(node->child[1], symbol_table, variables);
 
-    // Comparison operators: < =
+    // Comparison operators: < = > >= <=
     if(node->oper==EQUAL)
     {
         // Equality comparison
@@ -1501,14 +1325,82 @@ TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* varia
         result.type = BOOLEAN;
         return result;
     }
+
+    if(node->oper==GREATER_THAN)
+    {
+        // Greater than comparison
+        if(a.type == REAL || b.type == REAL)
+        {
+            // Real comparison
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result = TypedValue((a_val > b_val) ? 1 : 0, true);
+        }
+        else
+        {
+            // Integer comparison
+            result = TypedValue((a.int_val > b.int_val) ? 1 : 0, true);
+        }
+        result.type = BOOLEAN;
+        return result;
+    }
+
+    if(node->oper==GREATER_EQUAL)
+    {
+        // Greater than or equal comparison
+        if(a.type == REAL || b.type == REAL)
+        {
+            // Real comparison
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result = TypedValue((a_val >= b_val) ? 1 : 0, true);
+        }
+        else
+        {
+            // Integer comparison
+            result = TypedValue((a.int_val >= b.int_val) ? 1 : 0, true);
+        }
+        result.type = BOOLEAN;
+        return result;
+    }
+
+    if(node->oper==LESS_EQUAL)
+    {
+        // Less than or equal comparison
+        if(a.type == REAL || b.type == REAL)
+        {
+            // Real comparison
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            result = TypedValue((a_val <= b_val) ? 1 : 0, true);
+        }
+        else
+        {
+            // Integer comparison
+            result = TypedValue((a.int_val <= b.int_val) ? 1 : 0, true);
+        }
+        result.type = BOOLEAN;
+        return result;
+    }
     
-    // Logical AND operator (&)
+    // Arithmetic operators: + - * / ^ &
     if(node->oper==AND_OP)
     {
-        // AND operation on booleans
-        int result_val = (a.bool_val && b.bool_val) ? 1 : 0;
-        result = TypedValue(result_val, true);
-        result.type = BOOLEAN;
+        // Arithmetic & operation: a^2 - b^2
+        if(a.type == REAL || b.type == REAL)
+        {
+            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
+            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
+            double result_val = a_val * a_val - b_val * b_val;
+            result = TypedValue(result_val);
+            result.type = REAL;
+        }
+        else
+        {
+            int result_val = a.int_val * a.int_val - b.int_val * b.int_val;
+            result = TypedValue(result_val);
+            result.type = INTEGER;
+        }
         return result;
     }
 
