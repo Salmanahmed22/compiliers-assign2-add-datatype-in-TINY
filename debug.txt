@@ -8,20 +8,40 @@ Start Match
 End DeclStmt
 End Stmt
 Start Match
-[2] x (ID)
+[2] real (RealType)
+Start Stmt
+Start Match
+[2] y (ID)
+Start DeclStmt
+Start Match
+[2] ; (SemiColon)
+End DeclStmt
+End Stmt
+Start Match
+[3] bool (BoolType)
+Start Stmt
+Start Match
+[3] flag (ID)
+Start DeclStmt
+Start Match
+[3] ; (SemiColon)
+End DeclStmt
+End Stmt
+Start Match
+[5] x (ID)
 Start Stmt
 Start AssignStmt
 Start Match
-[2] := (Assign)
+[5] := (Assign)
 Start Match
-[2] 5 (Num)
+[5] 5 (Num)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[2] ; (SemiColon)
+[5] ; (SemiColon)
 End NewExpr
 End Factor
 End Term
@@ -30,18 +50,876 @@ End Expr
 End AssignStmt
 End Stmt
 Start Match
-[4] write (Write)
+[6] y (ID)
 Start Stmt
-Start WriteStmt
+Start AssignStmt
 Start Match
-[4] x (ID)
+[6] := (Assign)
+Start Match
+[6] 3.5 (Num)
 Start Expr
 Start MathExpr
 Start Term
 Start Factor
 Start NewExpr
 Start Match
-[4] ; (SemiColon)
+[6] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[7] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[7] := (Assign)
+Start Match
+[7] 5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[7] < (LessThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[7] 10 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[7] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[10] x (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[10] := (Assign)
+Start Match
+[10] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[10] + (Plus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[10] 3 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[10] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[11] x (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[11] := (Assign)
+Start Match
+[11] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[11] - (Minus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[11] 2 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[11] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[12] x (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[12] := (Assign)
+Start Match
+[12] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[12] * (Times)
+End NewExpr
+End Factor
+Start Match
+[12] 4 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[12] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[13] x (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[13] := (Assign)
+Start Match
+[13] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[13] / (Divide)
+End NewExpr
+End Factor
+Start Match
+[13] 2 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[13] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[14] x (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[14] := (Assign)
+Start Match
+[14] 2 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[14] ^ (Power)
+End NewExpr
+Start Match
+[14] 3 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[14] ; (SemiColon)
+End NewExpr
+End Factor
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[17] y (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[17] := (Assign)
+Start Match
+[17] y (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[17] + (Plus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[17] 2.5 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[17] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[18] y (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[18] := (Assign)
+Start Match
+[18] y (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[18] - (Minus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[18] 1.0 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[18] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[19] y (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[19] := (Assign)
+Start Match
+[19] y (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[19] * (Times)
+End NewExpr
+End Factor
+Start Match
+[19] 2.0 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[19] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[20] y (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[20] := (Assign)
+Start Match
+[20] y (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[20] / (Divide)
+End NewExpr
+End Factor
+Start Match
+[20] 2.5 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[20] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[23] y (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[23] := (Assign)
+Start Match
+[23] 5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[23] + (Plus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[23] 3.5 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[23] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[24] y (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[24] := (Assign)
+Start Match
+[24] 10 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[24] * (Times)
+End NewExpr
+End Factor
+Start Match
+[24] 2.0 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[24] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[27] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[27] := (Assign)
+Start Match
+[27] 5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[27] < (LessThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[27] 10 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[27] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[28] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[28] := (Assign)
+Start Match
+[28] 10 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[28] = (Equal)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[28] 10 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[28] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[29] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[29] := (Assign)
+Start Match
+[29] 3 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[29] > (GreaterThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[29] 5 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[29] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[30] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[30] := (Assign)
+Start Match
+[30] 4 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[30] >= (GreaterEqual)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[30] 4 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[30] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[31] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[31] := (Assign)
+Start Match
+[31] 2 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[31] <= (LessEqual)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[31] 3 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[31] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[34] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[34] := (Assign)
+Start Match
+[34] 3.5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[34] < (LessThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[34] 4.0 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[34] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[35] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[35] := (Assign)
+Start Match
+[35] 2.5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[35] = (Equal)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[35] 2.5 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[35] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[36] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[36] := (Assign)
+Start Match
+[36] 4.0 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[36] > (GreaterThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[36] 3.5 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[36] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[37] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[37] := (Assign)
+Start Match
+[37] 3.0 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[37] >= (GreaterEqual)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[37] 3.0 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[37] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[38] flag (ID)
+Start Stmt
+Start AssignStmt
+Start Match
+[38] := (Assign)
+Start Match
+[38] 2.5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[38] <= (LessEqual)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[38] 3.0 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[38] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+Start Match
+[41] if (If)
+Start Stmt
+Start IfStmt
+Start Match
+[41] flag (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[41] then (Then)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+Start Match
+[42] x (ID)
+Start StmtSeq
+Start Stmt
+Start AssignStmt
+Start Match
+[42] := (Assign)
+Start Match
+[42] 100 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[43] end (End)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+End StmtSeq
+Start Match
+[43] ; (SemiColon)
+End IfStmt
+End Stmt
+Start Match
+[46] repeat (Repeat)
+Start Stmt
+Start RepeatStmt
+Start Match
+[47] x (ID)
+Start StmtSeq
+Start Stmt
+Start AssignStmt
+Start Match
+[47] := (Assign)
+Start Match
+[47] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[47] + (Plus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[47] 1 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[48] until (Until)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End AssignStmt
+End Stmt
+End StmtSeq
+Start Match
+[48] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[48] = (Equal)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[48] 110 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[48] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End RepeatStmt
+End Stmt
+Start Match
+[51] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[51] x (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[51] + (Plus)
+End NewExpr
+End Factor
+End Term
+Start Match
+[51] 5 (Num)
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[51] ; (SemiColon)
 End NewExpr
 End Factor
 End Term
@@ -50,5 +928,161 @@ End Expr
 End WriteStmt
 End Stmt
 Start Match
-[4]  (EndFile)
+[52] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[52] y (ID)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[52] * (Times)
+End NewExpr
+End Factor
+Start Match
+[52] 2.0 (Num)
+Start Factor
+Start NewExpr
+Start Match
+[52] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[53] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[53] 10 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[53] < (LessThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[53] 5 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[53] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[54] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[54] 5 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[54] > (GreaterThan)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[54] 3 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[54] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[55] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[55] 4 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[55] >= (GreaterEqual)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[55] 4 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[55] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[56] write (Write)
+Start Stmt
+Start WriteStmt
+Start Match
+[56] 2 (Num)
+Start Expr
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[56] <= (LessEqual)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+Start Match
+[56] 3 (Num)
+Start MathExpr
+Start Term
+Start Factor
+Start NewExpr
+Start Match
+[56] ; (SemiColon)
+End NewExpr
+End Factor
+End Term
+End MathExpr
+End Expr
+End WriteStmt
+End Stmt
+Start Match
+[56]  (EndFile)
 End StmtSeq

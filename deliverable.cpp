@@ -9,51 +9,46 @@ using namespace std;
     20221072
 */
 /*
-int x := 5;
-real y := 3.5;
-bool flag := 5 < 10;
-
+int x;
+real y;
+bool flag;
+x := 5;
+y := 3.5;
+flag := 5 < 10;
 { Test 1: Basic arithmetic operations }
 x := x + 3;
 x := x - 2;
 x := x * 4;
 x := x / 2;
 x := 2 ^ 3;
-
 { Test 2: Real arithmetic operations }
 y := y + 2.5;
 y := y - 1.0;
 y := y * 2.0;
 y := y / 2.5;
-
 { Test 3: Mixed type arithmetic (int to real conversion) }
 y := 5 + 3.5;
 y := 10 * 2.0;
-
 { Test 4: Comparison operators returning boolean }
 flag := 5 < 10;
 flag := 10 = 10;
 flag := 3 > 5;
 flag := 4 >= 4;
 flag := 2 <= 3;
-
 { Test 5: Real comparisons }
 flag := 3.5 < 4.0;
 flag := 2.5 = 2.5;
 flag := 4.0 > 3.5;
 flag := 3.0 >= 3.0;
 flag := 2.5 <= 3.0;
-
 { Test 6: Conditional with boolean }
 if flag then
-  x := 100
+x := 100
 end;
-
 { Test 7: Repeat loop }
 repeat
-  x := x + 1
+x := x + 1
 until x = 110;
-
 { Test 8: Write results }
 write x + 5;
 write y * 2.0;
@@ -67,13 +62,11 @@ enum TokenType
     ASSIGN, EQUAL, LESS_THAN, GREATER_THAN, GREATER_EQUAL, LESS_EQUAL, // Comparison operators
     INT_TYPE, REAL_TYPE, BOOL_TYPE  // Type keywords: int, real, bool
 };
-
 const char* TokenTypeStr[]=
 {
     "Assign", "Equal", "LessThan", "GreaterThan", "GreaterEqual", "LessEqual", // Comparison operators for debugging
     "IntType", "RealType", "BoolType"  // Type keywords for debugging
 };
-
 const Token reserved_words[]=
 {
     Token(INT_TYPE, "int"),     // Type keyword for integer type
@@ -86,48 +79,34 @@ const Token symbolic_tokens[]=
     Token(LESS_EQUAL, "<="),     // add <=
     Token(GREATER_THAN, ">"),    // add >
 };
-
 void GetNextToken(CompilerInfo* pci, Token* ptoken)
 {
     else if(IsDigit(s[0]))
     {
-        // Parse numeric variable - support both integers and real numbers
-        int j=1;
+        // Parse numeric variable
         int has_decimal = 0;
-        
         // Parse digits and optional decimal point for real numbers instead of integers only
-        while(IsDigit(s[j]) || (s[j]=='.' && !has_decimal))
-        {
+        while(IsDigit(s[j]) || (s[j]=='.' && !has_decimal)){
             if(s[j]=='.') has_decimal=1;
             j++;
         }
-        
-        ptoken->type=NUM;
-        Copy(ptoken->str, s, j);
     }
 }
-
 // stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt | declstmt
 // declstmt -> type identifier := expr       (explicit type declaration with assignment)
-
 enum NodeKind
 {
     DECL_NODE  // DECL_NODE for type declarations
 };
-
 const char* NodeKindStr[]=
 {
     "Decl"  // Added Decl for for debugging 
 };
-
 enum ExprDataType {REAL}; // added REAL type
-
 const char* ExprDataTypeStr[]=
 {
     "Real"  // Added Real type for debugging
 };
-
-#define MAX_CHILDREN 3
 struct TreeNode
 {
     union{TokenType oper; int num; double real_num; char* id;}; // added real_num for real values
@@ -135,9 +114,8 @@ struct TreeNode
     ExprDataType expr_data_type;        // Data type of RHS expression result -> already exists
     ExprDataType var_type;              // Variable type (only for ID_NODE): INTEGER, REAL, or BOOLEAN                       
     
-    TreeNode() {int i; for(i=0;i<MAX_CHILDREN;i++) child[i]=0; sibling=0; expr_data_type=VOID;var_type=VOID;real_num=0.0;}
+    TreeNode() {int i; for(i=0;i<3;i++) child[i]=0; sibling=0; expr_data_type=VOID;var_type=VOID;real_num=0.0;}
 };
-
 TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
 {
             // Check if this is a real number (contains decimal point) or integer
@@ -155,24 +133,9 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
             tree->real_num = 0.0;
             double multiplier = 1.0;
             int before_decimal = 1;
-            
             while(*num_str)
             {
-                if(*num_str == '.')
-                {
-                    before_decimal = 0;
-                    multiplier = 0.1;
-                }
-                else
-                {
-                    if(before_decimal)
-                        tree->real_num = tree->real_num * 10.0 + (double)((*num_str) - '0');
-                    else
-                    {
-                        tree->real_num = tree->real_num + multiplier * (double)((*num_str) - '0');
-                        multiplier *= 0.1;
-                    }
-                }
+                // Handle decimal point
                 num_str++;
             }
             tree->expr_data_type = REAL;
@@ -186,7 +149,6 @@ TreeNode* NewExpr(CompilerInfo* pci, ParseInfo* ppi)
             tree->expr_data_type = INTEGER;
         }
 }
-
 // expr -> mathexpr [ (<|=) mathexpr ]
 TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
 {
@@ -194,37 +156,21 @@ TreeNode* Expr(CompilerInfo* pci, ParseInfo* ppi)
         ppi->next_token.type==GREATER_THAN || ppi->next_token.type==GREATER_EQUAL ||
         ppi->next_token.type==LESS_EQUAL) // added greater than, greater equal and less equal
 }
-
 // declstmt -> type identifier := expr
 // Explicit type declaration with initialization
 // Examples: int x := 5; real y; bool flag;
 TreeNode* DeclStmt(CompilerInfo* pci, ParseInfo* ppi, ExprDataType decl_type)
 {
     pci->debug_file.Out("Start DeclStmt");
-
     TreeNode* tree=new TreeNode;
     tree->node_kind=DECL_NODE;
     tree->line_num=pci->in_file.cur_line_num;
-    tree->var_type=decl_type;  // Store the declared type
-
-    // Parse: identifier := expr
+    tree->var_type=decl_type;
     if(ppi->next_token.type==ID) AllocateAndCopy(&tree->id, ppi->next_token.str);
     Match(pci, ppi, ID);
-    // Allow optional initializer: `int x;` or `int x := expr;`
-    if(ppi->next_token.type==ASSIGN)
-    {
-        Match(pci, ppi, ASSIGN);
-        tree->child[0]=Expr(pci, ppi);  // Parse the initializing expression
-    }
-    else
-    {
-        tree->child[0]=0; // no initializer
-    }
-
     pci->debug_file.Out("End DeclStmt");
     return tree;
 }
-
 // stmt -> ifstmt | repeatstmt | assignstmt | readstmt | writestmt | declstmt
 TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
 {
@@ -233,33 +179,17 @@ TreeNode* Stmt(CompilerInfo* pci, ParseInfo* ppi)
         Match(pci, ppi, INT_TYPE);
         tree=DeclStmt(pci, ppi, INTEGER);
     }
-    else if(ppi->next_token.type==REAL_TYPE)
-    {
-        Match(pci, ppi, REAL_TYPE);
-        tree=DeclStmt(pci, ppi, REAL);
-    }
-    else if(ppi->next_token.type==BOOL_TYPE)
-    {
-        Match(pci, ppi, BOOL_TYPE);
-        tree=DeclStmt(pci, ppi, BOOLEAN);
-    }
+    else if(ppi->next_token.type==REAL_TYPE) // same as INT_TYPE
+    else if(ppi->next_token.type==BOOL_TYPE) // same as INT_TYPE
 }
-
 void PrintTree(TreeNode* node, int sh=0)
 {
-    int i, NSH=3;
-    for(i=0;i<sh;i++) printf(" ");
-
-    printf("[%s]", NodeKindStr[node->node_kind]);
-
     if(node->node_kind==OPER_NODE) printf("[%s]", TokenTypeStr[node->oper]);
     else if(node->node_kind==NUM_NODE)
     {
         // Print numeric value based on type
-        if(node->expr_data_type == REAL)
-            printf("[%lf]", node->real_num);
-        else
-            printf("[%d]", node->num);
+        if(node->expr_data_type == REAL) printf("[%lf]", node->real_num);
+        else printf("[%d]", node->num);
     }
     else if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind==DECL_NODE)
         printf("[%s]", node->id);
@@ -268,47 +198,18 @@ void PrintTree(TreeNode* node, int sh=0)
     if(node->node_kind==DECL_NODE)
         printf("[%s]", ExprDataTypeStr[node->var_type]);
     else if(node->expr_data_type!=VOID) printf("[%s]", ExprDataTypeStr[node->expr_data_type]);
-
-    printf("\n");
-
-    for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) PrintTree(node->child[i], sh+NSH);
-    if(node->sibling) PrintTree(node->sibling, sh);
 }
-
 void DestroyTree(TreeNode* node)
 {
-    int i;
-
-    if(node->node_kind==ID_NODE || node->node_kind==READ_NODE || node->node_kind==ASSIGN_NODE || node->node_kind==DECL_NODE) // add declnode
-        if(node->id) delete[] node->id;
-
-    for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) DestroyTree(node->child[i]);
-    if(node->sibling) DestroyTree(node->sibling);
-
-    delete node;
+    if( node->node_kind==DECL_NODE) // add declnode
 }
-
 struct VariableInfo
 {
-    char* name;
-    int memloc;
     ExprDataType var_type; // Variable type: INTEGER, REAL, or BOOLEAN (only for ID_NODE)
-    LineLocation* head_line;
-    LineLocation* tail_line;
-    VariableInfo* next_var;
 };
-
 // Insert function in SymbolTable
 void Insert(const char* name, int line_num, ExprDataType type)// add type parameter
-{
-    LineLocation* lineloc=new LineLocation;
-    lineloc->line_num=line_num;
-    lineloc->next=0;
-
-    int h=Hash(name);
-    VariableInfo* prev=0;
-    VariableInfo* cur=var_info[h];
-
+{   
     while(cur)
     {
         if(Equals(name, cur->name))
@@ -321,108 +222,27 @@ void Insert(const char* name, int line_num, ExprDataType type)// add type parame
                            name, ExprDataTypeStr[cur->var_type], ExprDataTypeStr[type]);
                     throw 0;
                 }
-            cur->tail_line->next=lineloc;
-            cur->tail_line=lineloc;
-            return;
         }
-        prev=cur;
-        cur=cur->next_var;
     }
-
-    VariableInfo* vi=new VariableInfo;
-    vi->head_line=vi->tail_line=lineloc;
-    vi->next_var=0;
-    vi->memloc=num_vars++;
     vi->var_type=type; // Store the variable's data type
-
-    AllocateAndCopy(&vi->name, name);
-
-    if(!prev) var_info[h]=vi;
-    else prev->next_var=vi;
 }
-
 void Analyze(TreeNode* node, SymbolTable* symbol_table)
 {
-    int i;
-
-    for(i=0;i<MAX_CHILDREN;i++) if(node->child[i]) Analyze(node->child[i], symbol_table);
-
     // add handling for explicit type declarations
     if(node->node_kind==DECL_NODE)
     {
-        // Declared type is stored in node->var_type
-        // RHS expression type is in node->child[0]->expr_data_type (if initializer present)
-        ExprDataType rhs_type = VOID;
-        if(node->child[0]) rhs_type = node->child[0]->expr_data_type;
-        ExprDataType decl_type = node->var_type;
-        // If initializer present, check compatibility
-        if(node->child[0])
-        {
-            if(decl_type != rhs_type)
-            {
-                printf("ERROR Line %d: Declaration type mismatch: cannot assign %s to %s variable '%s'\n",
-                       node->line_num,
-                       ExprDataTypeStr[rhs_type],
-                       ExprDataTypeStr[decl_type],
-                       node->id);
-                throw 0;
-            }
-        }
-
-        // Register the variable with its declared type (initializer optional)
         VariableInfo* var = symbol_table->Find(node->id);
         if(!var)
         {
-            symbol_table->Insert(node->id, node->line_num, decl_type);
+            symbol_table->Insert(node->id, node->line_num, node->var_type);
         }
     }
     // modify this condition to avoid boolean type comparisons with < or =
     if(node->node_kind==OPER_NODE)
     {
-        ExprDataType left_type = node->child[0]->expr_data_type;
-        ExprDataType right_type = node->child[1]->expr_data_type;
-        
-        // Comparison operators (<, =, <=, >, >=) return BOOLEAN type
-        if(node->oper==EQUAL || node->oper==LESS_THAN || node->oper==GREATER_THAN ||
-            node->oper==GREATER_EQUAL || node->oper==LESS_EQUAL)
+        if(node->oper==LESS_THAN || node->oper==LESS_EQUAL || node->oper==GREATER_THAN || node->oper==GREATER_EQUAL)
         {
-            node->expr_data_type=BOOLEAN;
-            
-            // Type checking for comparisons
-            if((left_type == BOOLEAN || right_type == BOOLEAN))
-            {
-                printf("ERROR Line %d: Cannot compare BOOLEAN values with comparison operators\n", node->line_num);
-                throw 0;
-            }
-            if((left_type == VOID || right_type == VOID))
-            {
-                printf("ERROR Line %d: Invalid operand type in comparison\n", node->line_num);
-                throw 0;
-            }
-        }
-        // Arithmetic operators: + - * / ^
-        else
-        {
-            // Check that neither operand is BOOLEAN
-            if(left_type == BOOLEAN || right_type == BOOLEAN)
-            {
-                printf("ERROR Line %d: Arithmetic operator applied to BOOLEAN type\n", node->line_num);
-                throw 0;
-            }
-            
-            // Determine result type based on operands
-            // If either is REAL, result is REAL
-            // Otherwise result is INTEGER
-            if(left_type == REAL || right_type == REAL)
-                node->expr_data_type = REAL;
-            else if(left_type == INTEGER && right_type == INTEGER)
-                node->expr_data_type = INTEGER;
-            else
-            {
-                printf("ERROR Line %d: Invalid operand types for arithmetic: %s and %s\n",
-                       node->line_num, ExprDataTypeStr[left_type], ExprDataTypeStr[right_type]);
-                throw 0;
-            }
+            node->expr_data_type = BOOLEAN;
         }
     }
     // Set type for NUM_NODE (integer or real value)
@@ -439,7 +259,6 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
         if(!var)
         {
             // Variable not yet found - will be created on first assignment
-            // Mark as INTEGER for now
             node->var_type = INTEGER;
             node->expr_data_type = INTEGER;
         }
@@ -465,22 +284,6 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
             symbol_table->Insert(node->id, node->line_num, rhs_type);
             var = symbol_table->Find(node->id);
             node->var_type = rhs_type;
-        }
-        else if(var->var_type == VOID)
-        {
-            // Variable was auto-declared but type not yet set
-            var->var_type = rhs_type;
-            node->var_type = rhs_type;
-        }
-        else if(var->var_type != rhs_type)
-        {
-            // Type mismatch: variable type != RHS expression type
-            printf("ERROR Line %d: Assignment type mismatch: cannot assign %s to %s variable '%s'\n",
-                    node->line_num,
-                    ExprDataTypeStr[rhs_type],
-                    ExprDataTypeStr[var->var_type],
-                    node->id);
-            throw 0;
         }
         else
         {
@@ -520,13 +323,7 @@ void Analyze(TreeNode* node, SymbolTable* symbol_table)
             throw 0;
         }
     }
-
-    // Recursively analyze sibling nodes
-    if(node->sibling) 
-        Analyze(node->sibling, symbol_table);
 }
-
-
 struct TypedValue
 {
     ExprDataType type;      // Type of the value: INTEGER, REAL, or BOOLEAN
@@ -542,57 +339,21 @@ struct TypedValue
     
     TypedValue(int val, bool) : type(BOOLEAN), int_val(val), real_val(0.0), bool_val(val) {}
 };
-
-// Power function for real numbers
-double RealPower(double a, int b)
-{
-    if(a==0.0) return 0.0;
-    if(b==0) return 1.0;
-    if(b>0)
-    {
-        double result = 1.0;
-        int i;
-        for(i=0;i<b;i++) result = result * a;
-        return result;
-    }
-    return 0.0;
-}
-
-
 TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* variables)
 {
     TypedValue result;
     
     // NUM_NODE: numeric literal (int or real)
-    if(node->node_kind==NUM_NODE)
+    if(node->node_kind==NUM_NODE) // for real numbers
     {
-        // Check if this is a real literal or integer literal
         if(node->expr_data_type == REAL)
-        {
-            // Parse as real number
-            result = TypedValue(node->real_num);
-            result.type = REAL;
-        }
+            return TypedValue(node->real_num);
         else
-        {
-            // Parse as integer
-            result = TypedValue(node->num);
-            result.type = INTEGER;
-        }
-        return result;
+            return TypedValue(node->num);
     }
     
     // ID_NODE: variable reference
     if(node->node_kind==ID_NODE)
-    {
-        VariableInfo* var = symbol_table->Find(node->id);
-        if(!var)
-        {
-            printf("ERROR Undefined variable '%s'\n", node->id);
-            throw 0;
-        }
-        return variables[var->memloc];
-    }
 
     // OPER_NODE: binary operations
     TypedValue a = Evaluate(node->child[0], symbol_table, variables);
@@ -618,102 +379,14 @@ TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* varia
         return result;
     }
     
-    if(node->oper==LESS_THAN)
-    {
-        // Less than comparison
-        if(a.type == REAL || b.type == REAL)
-        {
-            // Real comparison
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            result = TypedValue((a_val < b_val) ? 1 : 0, true);
-        }
-        else
-        {
-            // Integer comparison
-            result = TypedValue((a.int_val < b.int_val) ? 1 : 0, true);
-        }
-        result.type = BOOLEAN;
-        return result;
-    }
+    if(node->oper==LESS_THAN)  // same as EQUAL
 
-    if(node->oper==GREATER_THAN)
-    {
-        // Greater than comparison
-        if(a.type == REAL || b.type == REAL)
-        {
-            // Real comparison
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            result = TypedValue((a_val > b_val) ? 1 : 0, true);
-        }
-        else
-        {
-            // Integer comparison
-            result = TypedValue((a.int_val > b.int_val) ? 1 : 0, true);
-        }
-        result.type = BOOLEAN;
-        return result;
-    }
+    if(node->oper==GREATER_THAN)  // same as EQUAL
 
-    if(node->oper==GREATER_EQUAL)
-    {
-        // Greater than or equal comparison
-        if(a.type == REAL || b.type == REAL)
-        {
-            // Real comparison
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            result = TypedValue((a_val >= b_val) ? 1 : 0, true);
-        }
-        else
-        {
-            // Integer comparison
-            result = TypedValue((a.int_val >= b.int_val) ? 1 : 0, true);
-        }
-        result.type = BOOLEAN;
-        return result;
-    }
+    if(node->oper==GREATER_EQUAL)  // same as EQUAL
 
-    if(node->oper==LESS_EQUAL)
-    {
-        // Less than or equal comparison
-        if(a.type == REAL || b.type == REAL)
-        {
-            // Real comparison
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            result = TypedValue((a_val <= b_val) ? 1 : 0, true);
-        }
-        else
-        {
-            // Integer comparison
-            result = TypedValue((a.int_val <= b.int_val) ? 1 : 0, true);
-        }
-        result.type = BOOLEAN;
-        return result;
-    }
+    if(node->oper==LESS_EQUAL) // same as EQUAL
     
-    // Arithmetic operators: + - * / ^ &
-    if(node->oper==AND_OP)
-    {
-        // Arithmetic & operation: a^2 - b^2
-        if(a.type == REAL || b.type == REAL)
-        {
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            double result_val = a_val * a_val - b_val * b_val;
-            result = TypedValue(result_val);
-            result.type = REAL;
-        }
-        else
-        {
-            int result_val = a.int_val * a.int_val - b.int_val * b.int_val;
-            result = TypedValue(result_val);
-            result.type = INTEGER;
-        }
-        return result;
-    }
 
     // Arithmetic operators: + - * / ^
     if(node->oper==PLUS)
@@ -735,88 +408,17 @@ TypedValue Evaluate(TreeNode* node, SymbolTable* symbol_table, TypedValue* varia
         return result;
     }
     
-    if(node->oper==MINUS)
-    {
-        if(a.type == REAL || b.type == REAL)
-        {
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            result.type = REAL;
-            result.real_val = a_val - b_val;
-        }
-        else
-        {
-            result.type = INTEGER;
-            result.int_val = a.int_val - b.int_val;
-        }
-        return result;
-    }
+    if(node->oper==MINUS) // same as PLUS
     
-    if(node->oper==TIMES)
-    {
-        if(a.type == REAL || b.type == REAL)
-        {
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            result.type = REAL;
-            result.real_val = a_val * b_val;
-        }
-        else
-        {
-            result.type = INTEGER;
-            result.int_val = a.int_val * b.int_val;
-        }
-        return result;
-    }
+    if(node->oper==TIMES) // same as PLUS
     
-    if(node->oper==DIVIDE)
-    {
-        if(a.type == REAL || b.type == REAL)
-        {
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            double b_val = (b.type == REAL) ? b.real_val : (double)b.int_val;
-            if(b_val == 0.0)
-            {
-                printf("ERROR Division by zero\n");
-                throw 0;
-            }
-            result.type = REAL;
-            result.real_val = a_val / b_val;
-        }
-        else
-        {
-            if(b.int_val == 0)
-            {
-                printf("ERROR Division by zero\n");
-                throw 0;
-            }
-            result.type = INTEGER;
-            result.int_val = a.int_val / b.int_val;
-        }
-        return result;
-    }
+    if(node->oper==DIVIDE) // same as PLUS
     
-    if(node->oper==POWER)
-    {
-        if(a.type == REAL || b.type == REAL)
-        {
-            double a_val = (a.type == REAL) ? a.real_val : (double)a.int_val;
-            int b_val = (b.type == REAL) ? (int)b.real_val : b.int_val;
-            result.type = REAL;
-            result.real_val = RealPower(a_val, b_val);
-        }
-        else
-        {
-            result.type = INTEGER;
-            result.int_val = Power(a.int_val, b.int_val);
-        }
-        return result;
-    }
+    if(node->oper==POWER) // same as PLUS
 
     throw 0;
     return result;
 }
-
 // Enhanced runtime execution with full type support
 // Executes the abstract syntax tree with proper handling of int, real, and bool types
 // Variables are stored as TypedValue structures in the variables array
@@ -824,125 +426,24 @@ void RunProgram(TreeNode* node, SymbolTable* symbol_table, TypedValue* variables
 {
     // IF statement: if (condition) then ... [else ...] end
     if(node->node_kind==IF_NODE)
-    {
-        // Evaluate the condition expression (must be BOOLEAN)
-        TypedValue cond = Evaluate(node->child[0], symbol_table, variables);
-        if(cond.bool_val)
-        {
-            // Condition is true: execute then branch
-            RunProgram(node->child[1], symbol_table, variables);
-        }
-        else if(node->child[2])
-        {
-            // Condition is false and else branch exists: execute else branch
-            RunProgram(node->child[2], symbol_table, variables);
-        }
-    }
-    
     // DECL statement: type identifier := expression (explicit declaration with initialization)
     if(node->node_kind==DECL_NODE)
-    {
-        // Evaluate the initializing expression
-        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
-        
-        // Store the result in the variable
-        VariableInfo* var = symbol_table->Find(node->id);
-        if(var)
-        {
-            variables[var->memloc] = v;
-        }
-    }
     
     // ASSIGN statement: variable := expression
     if(node->node_kind==ASSIGN_NODE)
-    {
-        // Evaluate the right-hand side expression
-        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
-        
-        // Store the result in the variable
-        VariableInfo* var = symbol_table->Find(node->id);
-        if(var)
-        {
-            variables[var->memloc] = v;
-        }
-    }
     
     // READ statement: read variable_name
     if(node->node_kind==READ_NODE)
-    {
-        // Read input value of appropriate type from user
-        VariableInfo* var = symbol_table->Find(node->id);
-        if(var)
-        {
-            printf("Enter %s (%s): ", node->id, ExprDataTypeStr[var->var_type]);
-            
-            // Read based on variable type
-            if(var->var_type == REAL)
-            {
-                // Read as real/double
-                double input_val;
-                scanf("%lf", &input_val);
-                variables[var->memloc] = TypedValue(input_val);
-                variables[var->memloc].type = REAL;
-            }
-            else if(var->var_type == BOOLEAN)
-            {
-                // Read as integer (0=false, non-0=true)
-                int input_val;
-                scanf("%d", &input_val);
-                variables[var->memloc] = TypedValue(input_val, true);
-                variables[var->memloc].type = BOOLEAN;
-            }
-            else  // INTEGER
-            {
-                // Read as integer
-                int input_val;
-                scanf("%d", &input_val);
-                variables[var->memloc] = TypedValue(input_val);
-                variables[var->memloc].type = INTEGER;
-            }
-        }
-    }
-    
     // WRITE statement: write expression
     if(node->node_kind==WRITE_NODE)
-    {
-        // Evaluate and output the expression result
-        TypedValue v = Evaluate(node->child[0], symbol_table, variables);
-        
-        // Output based on type
-        if(v.type == REAL)
-        {
-            printf("Val: %lf\n", v.real_val);
-        }
-        else if(v.type == BOOLEAN)
-        {
-            printf("Val: %s\n", v.bool_val ? "true" : "false");
-        }
-        else  // INTEGER
-        {
-            printf("Val: %d\n", v.int_val);
-        }
-    }
     
     // REPEAT statement: repeat ... until (condition)
     if(node->node_kind==REPEAT_NODE)
-    {
-        // Execute loop body repeatedly until condition becomes true
-        do
-        {
-            // Execute loop body (first child)
-            RunProgram(node->child[0], symbol_table, variables);
-            // Evaluate condition (second child)
-        }
-        while(!Evaluate(node->child[1], symbol_table, variables).bool_val);
-    }
     
     // Process sibling nodes (for statement sequences)
     if(node->sibling)
         RunProgram(node->sibling, symbol_table, variables);
 }
-
 // Wrapper function for RunProgram that allocates variable storage
 // Creates array of TypedValue structures for all variables in the symbol table
 // All variables initialized to 0 (or 0.0 for real)
@@ -958,11 +459,4 @@ void RunProgram(TreeNode* syntax_tree, SymbolTable* symbol_table)
         variables[i] = TypedValue(0);
         variables[i].type = VOID;  // Will be set by actual assignments
     }
-    
-    // Execute the program
-    RunProgram(syntax_tree, symbol_table, variables);
-    
-    // Clean up allocated memory
-    delete[] variables;
 }
-

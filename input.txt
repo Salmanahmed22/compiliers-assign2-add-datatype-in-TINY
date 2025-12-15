@@ -1,6 +1,10 @@
-int x := 5;
-real y := 3.5;
-bool flag := 5 < 10;
+int x;
+real y;
+bool flag;
+
+x := 5;
+y := 3.5;
+flag := 5 < 10;
 
 { Test 1: Basic arithmetic operations }
 x := x + 3;
